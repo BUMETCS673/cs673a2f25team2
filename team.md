@@ -17,3 +17,8 @@
 
 * CS graduate student at BU.
 * Design and Implementation Leader. Interested in Basketball, video game and photography 
+
+## Hanxiao Wang
+
+* Master’s student in CS at BU
+* Experienced in Software Engineering, Machine Learning, and mobile app development
