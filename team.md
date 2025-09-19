@@ -12,3 +12,8 @@
 
 * First year Master’s student in CS at BU
 * My name is Pongpol Pimpa, but I preferred to be called with my nickname "Mark".
+
+## Zhiyao Song
+
+* CS graduate student at BU.
+* Design and Implementation Leader. Interested in Basketball, video game and photography 
