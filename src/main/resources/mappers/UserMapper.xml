@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.health.mapper.UserMapper">
+
+    <resultMap id="UserResultMap" type="com.example.health.domain.User">
+        <id column="id" property="id" />
+        <result column="username" property="username" />
+        <result column="password_hash" property="passwordHash" />
+        <result column="email" property="email" />
+        <result column="full_name" property="fullName" />
+        <result column="age" property="age" />
+        <result column="gender" property="gender" />
+        <result column="phone" property="phone" />
+        <result column="avatar" property="avatar" />
+        <result column="google_id" property="googleId" />
+        <result column="login_type" property="loginType" />
+        <result column="is_active" property="isActive" />
+        <result column="created_at" property="createdAt" />
+        <result column="updated_at" property="updatedAt" />
+    </resultMap>
+
+    <select id="findByUsername" parameterType="string" resultMap="UserResultMap">
+        SELECT id, username, password_hash, email, full_name, age, gender, phone, avatar, 
+               google_id, login_type, is_active, created_at, updated_at
+        FROM users
+        WHERE username = #{username}
+        LIMIT 1
+    </select>
+
+    <select id="findByEmail" parameterType="string" resultMap="UserResultMap">
+        SELECT id, username, password_hash, email, full_name, age, gender, phone, avatar, 
+               google_id, login_type, is_active, created_at, updated_at
+        FROM users
+        WHERE email = #{email}
+        LIMIT 1
+    </select>
+
+    <select id="findByGoogleId" parameterType="string" resultMap="UserResultMap">
+        SELECT id, username, password_hash, email, full_name, age, gender, phone, avatar, 
+               google_id, login_type, is_active, created_at, updated_at
+        FROM users
+        WHERE google_id = #{googleId}
+        LIMIT 1
+    </select>
+
+    <select id="findById" parameterType="long" resultMap="UserResultMap">
+        SELECT id, username, password_hash, email, full_name, age, gender, phone, avatar, 
+               google_id, login_type, is_active, created_at, updated_at
+        FROM users
+        WHERE id = #{id}
+        LIMIT 1
+    </select>
+
+    <select id="findAll" resultMap="UserResultMap">
+        SELECT id, username, password_hash, email, full_name, age, gender, phone, avatar, 
+               google_id, login_type, is_active, created_at, updated_at
+        FROM users
+        ORDER BY created_at DESC
+    </select>
+
+    <insert id="insert" parameterType="com.example.health.domain.User" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO users (username, password_hash, email, full_name, age, gender, phone, avatar, 
+                          google_id, login_type, is_active, created_at, updated_at)
+        VALUES (#{username}, #{passwordHash}, #{email}, #{fullName}, #{age}, #{gender}, #{phone}, #{avatar}, 
+                #{googleId}, #{loginType}, #{isActive}, #{createdAt}, #{updatedAt})
+    </insert>
+
+    <update id="update" parameterType="com.example.health.domain.User">
+        UPDATE users 
+        SET username = #{username},
+            email = #{email},
+            full_name = #{fullName},
+            age = #{age},
+            gender = #{gender},
+            phone = #{phone},
+            avatar = #{avatar},
+            google_id = #{googleId},
+            login_type = #{loginType},
+            is_active = #{isActive},
+            updated_at = #{updatedAt}
+        WHERE id = #{id}
+    </update>
+
+    <update id="updatePassword">
+        UPDATE users 
+        SET password_hash = #{passwordHash},
+            updated_at = datetime('now')
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="long">
+        DELETE FROM users WHERE id = #{id}
+    </delete>
+
+</mapper>
+
+

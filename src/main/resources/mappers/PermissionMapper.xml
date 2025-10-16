@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.health.mapper.PermissionMapper">
+
+    <resultMap id="PermissionResultMap" type="com.example.health.domain.Permission">
+        <id column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="description" property="description" />
+        <result column="resource" property="resource" />
+        <result column="action" property="action" />
+        <result column="created_at" property="createdAt" />
+    </resultMap>
+
+    <select id="findById" parameterType="long" resultMap="PermissionResultMap">
+        SELECT id, name, description, resource, action, created_at
+        FROM permissions
+        WHERE id = #{id}
+    </select>
+
+    <select id="findByName" parameterType="string" resultMap="PermissionResultMap">
+        SELECT id, name, description, resource, action, created_at
+        FROM permissions
+        WHERE name = #{name}
+    </select>
+
+    <select id="findAll" resultMap="PermissionResultMap">
+        SELECT id, name, description, resource, action, created_at
+        FROM permissions
+        ORDER BY resource, action
+    </select>
+
+    <select id="findByUserId" parameterType="long" resultMap="PermissionResultMap">
+        SELECT DISTINCT p.id, p.name, p.description, p.resource, p.action, p.created_at
+        FROM permissions p
+        INNER JOIN role_permissions rp ON p.id = rp.permission_id
+        INNER JOIN user_roles ur ON rp.role_id = ur.role_id
+        WHERE ur.user_id = #{userId}
+    </select>
+
+    <insert id="insert" parameterType="com.example.health.domain.Permission" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO permissions (name, description, resource, action, created_at)
+        VALUES (#{name}, #{description}, #{resource}, #{action}, #{createdAt})
+    </insert>
+
+    <update id="update" parameterType="com.example.health.domain.Permission">
+        UPDATE permissions 
+        SET name = #{name},
+            description = #{description},
+            resource = #{resource},
+            action = #{action}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="long">
+        DELETE FROM permissions WHERE id = #{id}
+    </delete>
+
+</mapper>
