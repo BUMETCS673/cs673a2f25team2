@@ -1,0 +1,18 @@
+# 禁用 Dependabot 自动更新
+# 项目为演示性质，不需要自动安全更新
+
+version: 2
+updates: []
+
+# 如果将来需要启用，可以使用以下配置：
+# updates:
+#   - package-ecosystem: "npm"
+#     directory: "/frontend"
+#     schedule:
+#       interval: "monthly"
+#     open-pull-requests-limit: 5
+#   - package-ecosystem: "npm"
+#     directory: "/frontend/health-frontend"
+#     schedule:
+#       interval: "monthly"
+#     open-pull-requests-limit: 5
