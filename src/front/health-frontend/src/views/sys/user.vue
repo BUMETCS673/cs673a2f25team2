@@ -1,18 +1,17 @@
-<!-- 搜索框和添加按钮，搜索框，以及用户名和手机号的输入框 -->
 <template>
   <div>
     <el-card id="search">
       <el-row>
         <el-col :span="23">
-          <!-- v-model绑定组件实现双向数据绑定，页面上用户输入的值会同步更新到该属性中 -->
+          <!-- Search bar and add button with username & phone filters -->
           <el-input
             v-model="searchModel.username"
-            placeholder="用户名"
+            placeholder="Username"
             clearable
           ></el-input>
           <el-input
             v-model="searchModel.phone"
-            placeholder="手机号"
+            placeholder="Phone Number"
             clearable
           ></el-input>
           <el-button
@@ -20,7 +19,7 @@
             type="primary"
             round
             icon="el-icon-search"
-            >查询</el-button
+            >Search</el-button
           >
         </el-col>
         <el-col :span="1">
@@ -34,28 +33,28 @@
       </el-row>
     </el-card>
 
-    <!-- 结果列表 -->
+    <!-- Results table -->
     <el-card>
       <el-table :data="userList" stripe style="width: 100%">
         <el-table-column
           type="index"
-          label="序号"
+          label="No."
           width="180"
         ></el-table-column>
-        <el-table-column prop="id" label="用户ID" width="180"></el-table-column>
+        <el-table-column prop="id" label="User ID" width="180"></el-table-column>
         <el-table-column
           prop="username"
-          label="用户名"
+          label="Username"
           width="180"
         ></el-table-column>
         <el-table-column
           prop="phone"
-          label="电话"
+          label="Phone"
           width="180"
         ></el-table-column>
-        <el-table-column prop="email" label="电子邮件"></el-table-column>
-        <el-table-column label="操作" width="180">
-          <!-- 删除和修改按钮 -->
+        <el-table-column prop="email" label="Email"></el-table-column>
+        <el-table-column label="Actions" width="180">
+          <!-- Delete and edit buttons -->
           <template slot-scope="scope">
             <el-button
               @click="openEditUi(scope.row.id)"
@@ -74,7 +73,7 @@
       </el-table>
     </el-card>
 
-    <!-- 分页功能 -->
+    <!-- Pagination -->
     <el-pagination
       @size-change="handleSizeChange"
       @current-change="handleCurrentChange"
@@ -86,7 +85,7 @@
     >
     </el-pagination>
 
-    <!-- 用户编辑信息弹出框 -->
+    <!-- User edit dialog -->
     <el-dialog
       @close="clearForm"
       :title="title"
@@ -94,7 +93,7 @@
     >
       <el-form :model="userForm" ref="userFormRef" :rules="rules">
         <el-form-item
-          label="用户名"
+          label="Username"
           prop="username"
           :label-width="formLabelWidth"
         >
@@ -103,7 +102,7 @@
 
         <el-form-item
           v-if="userForm.id == null || userForm.id == undefined"
-          label="密码"
+          label="Password"
           prop="password"
           :label-width="formLabelWidth"
         >
@@ -114,19 +113,19 @@
           ></el-input>
         </el-form-item>
 
-        <el-form-item label="联系电话" :label-width="formLabelWidth">
+        <el-form-item label="Phone" :label-width="formLabelWidth">
           <el-input v-model="userForm.phone" autocomplete="off"></el-input>
         </el-form-item>
 
         <el-form-item
-          label="电子邮件"
+          label="Email"
           prop="email"
           :label-width="formLabelWidth"
         >
           <el-input v-model="userForm.email" autocomplete="off"></el-input>
         </el-form-item>
 
-        <el-form-item label="用户角色" :label-width="formLabelWidth">
+        <el-form-item label="User Role" :label-width="formLabelWidth">
           <el-checkbox-group v-model="userForm.roleIdList" :max="1">
             <el-checkbox
               v-for="role in roleList"
@@ -139,8 +138,8 @@
       </el-form>
 
       <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="saveUser">确 定</el-button>
+        <el-button @click="dialogFormVisible = false">Cancel</el-button>
+        <el-button type="primary" @click="saveUser">Confirm</el-button>
       </div>
     </el-dialog>
   </div>
@@ -151,18 +150,18 @@ import userApi from "@/api/userManage";
 import roleApi from "@/api/roleManage";
 export default {
   data() {
-    //自定义表单验证规则
+    // Custom form validation rules
     var checkEmail = (rule, value, callback) => {
       var reg = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;
       if (!reg.test(value)) {
-        return callback(new Error("输入的邮箱格式错误"));
+        return callback(new Error("Invalid email format"));
       }
     };
 
     return {
-      //左边宽度
+      // Label column width
       formLabelWidth: "135px",
-      //设置默认值不可见
+      // Dialog hidden by default
       dialogFormVisible: false,
       userForm: {
         roleIdList: [],
@@ -172,33 +171,33 @@ export default {
       roleList: [],
       searchModel: {
         pageNo: 1,
-        // 默认显示数量
+        // Default page size
         pageSize: 10,
       },
       userList: [],
-      //表单规则配置
+      // Form validation rules
 
       rules: {
         username: [
-          { required: true, message: "请输入用户名", trigger: "blur" },
+          { required: true, message: "Please enter a username", trigger: "blur" },
           {
             min: 2,
             max: 20,
-            message: "长度需要在 2 到 20 个字符",
+            message: "Length must be between 2 and 20 characters",
             trigger: "blur",
           },
         ],
         password: [
-          { required: true, message: "请输入密码", trigger: "blur" },
+          { required: true, message: "Please enter a password", trigger: "blur" },
           {
             min: 6,
             max: 20,
-            message: "长度需要在 6 到 20 个字符",
+            message: "Length must be between 6 and 20 characters",
             trigger: "blur",
           },
         ],
         email: [
-          { required: true, message: "请输入电子邮件", trigger: "blur" },
+          { required: true, message: "Please enter an email", trigger: "blur" },
           { validator: checkEmail, trigger: "blur" },
         ],
       },
@@ -214,21 +213,21 @@ export default {
 
     saveUser() {
       let isOk = true;
-      //触发表单的验证
+      // Trigger form validation
       this.$refs.userFormRef.validate((valid) => {
-        // 这边只有校验失败的时候才会进来
+        // This only runs if validation fails
         isOk = valid;
       });
       if (isOk) {
-        //提交验证给后台
+        // Submit validated form to backend
         userApi.saveUser(this.userForm).then((response) => {
           this.$message({
             message: response.message,
             type: "success",
           });
-          //关闭对话框
+          // Close dialog
           this.dialogFormVisible = false;
-          //刷新表格数据
+          // Refresh table data
           this.getUserList();
         });
       } else {
@@ -242,11 +241,11 @@ export default {
       this.userForm = {
         roleIdList: [],
       };
-      //清除表单校验的提示信息
+      // Clear validation messages
       this.$refs.userFormRef.clearValidate();
     },
     handleSizeChange(pageSize) {
-      //数据更新
+      // Update data
       this.searchModel.pageSize = pageSize;
       this.getUserList();
     },
@@ -263,10 +262,10 @@ export default {
     },
     openEditUi(id) {
       if (id == null) {
-        this.title = "新增用户";
+        this.title = "Add User";
       } else {
-        this.title = "修改用户";
-        //根据id查询用户数据
+        this.title = "Edit User";
+        // Fetch user data by ID
         userApi.getUserById(id).then((response) => {
           this.userForm = response.data;
         });
@@ -275,9 +274,9 @@ export default {
     },
 
     deleteUser(user) {
-      this.$confirm(`确认删除 ${user.username} 这个账户吗？`, "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
+      this.$confirm(`Delete account ${user.username}?`, "Confirm", {
+        confirmButtonText: "OK",
+        cancelButtonText: "Cancel",
         type: "warning",
       })
         .then(() => {
@@ -292,7 +291,7 @@ export default {
         .catch(() => {
           this.$message({
             type: "info",
-            message: "已取消删除",
+            message: "Deletion cancelled",
           });
         });
     },
@@ -300,6 +299,7 @@ export default {
 
 
   created() {
+    // Fetch list on load
     this.getUserList();
     this.getAllRoleList();
   },
@@ -315,7 +315,7 @@ export default {
 }
 
 
-/* 很美观的CSS卡片 */
+/* Stylish card */
 .el-card {
   width: 80%;
   margin: 20px auto;
@@ -324,13 +324,13 @@ export default {
   overflow: hidden;
 }
 
-/* 很美观的CSS表格 */
+/* Stylish table */
 .el-table {
   width: 100%;
   border-collapse: collapse;
 }
 
-/* 很美观的CSS表格标题 */
+/* Stylish table header */
 .el-table-column {
   background-color: lightblue;
   color: white;
@@ -339,7 +339,7 @@ export default {
   text-align: center;
 }
 
-/* 很美观的CSS表格数据 */
+/* Stylish table data */
 .el-table-column[type="index"],
 .el-table-column[prop="id"],
 .el-table-column[prop="username"],
@@ -352,7 +352,7 @@ export default {
   text-align: center;
 }
 
-/* 很美观的CSS表格数据悬停效果 */
+/* Stylish table hover effect */
 .el-table-column[type="index"]:hover,
 .el-table-column[prop="id"]:hover,
 .el-table-column[prop="username"]:hover,
@@ -362,12 +362,12 @@ export default {
   color: white;
 }
 
-/* 很美观的CSS按钮悬停效果 */
+/* Stylish button hover effect */
 .el-button:hover {
   transform: scale(1.2);
 }
 
-/* 和这个代码一样的CSS */
+/* Pagination CSS */
 .el-pagination {
   display: flex;
   align-items: center;
@@ -375,45 +375,45 @@ export default {
   margin: 20px;
 }
 
-/* 和这个代码一样的CSS总数 */
+/* Pagination total label */
 .el-pagination__total {
   color: #606266;
   margin-right: 20px;
 }
 
-/* 和这个代码一样的CSS每页显示条数 */
+/* Pagination page size */
 .el-pagination__sizes {
   display: flex;
   align-items: center;
   margin-right: 20px;
 }
 
-/* 和这个代码一样的CSS每页显示条数选择器 */
+/* Pagination page size selector */
 .el-pagination__sizes .el-select {
   width: 100px;
 }
 
-/* 和这个代码一样的CSS上一页按钮 */
+/* Pagination previous button */
 .el-pagination__prev {
   display: flex;
   align-items: center;
   margin-right: 10px;
 }
 
-/* 和这个代码一样的CSS上一页按钮图标 */
+/* Pagination previous icon */
 .el-pagination__prev .el-icon {
   font-size: 20px;
   color: #409eff;
 }
 
-/* 和这个代码一样的CSS页码 */
+/* Pagination pager */
 .el-pagination__pager {
   display: flex;
   align-items: center;
   margin-right: 10px;
 }
 
-/* 和这个代码一样的CSS页码按钮 */
+/* Pagination page button */
 .el-pagination__pager button {
   width: 30px;
   height: 30px;
@@ -425,43 +425,43 @@ export default {
   transition: all 0.3s ease-in-out;
 }
 
-/* 和这个代码一样的CSS页码按钮悬停效果 */
+/* Pagination page hover */
 .el-pagination__pager button:hover {
   background-color: #409eff;
   color: white;
 }
 
-/* 和这个代码一样的CSS当前页码按钮 */
+/* Pagination active button */
 .el-pagination__pager button.is-active {
   background-color: #409eff;
   color: white;
 }
 
-/* 和这个代码一样的CSS下一页按钮 */
+/* Pagination next button */
 .el-pagination__next {
   display: flex;
   align-items: center;
   margin-right: 10px;
 }
 
-/* 和这个代码一样的CSS下一页按钮图标 */
+/* Pagination next icon */
 .el-pagination__next .el-icon {
   font-size: 20px;
   color: #409eff;
 }
 
-/* 和这个代码一样的CSS跳转输入框 */
+/* Pagination jump input */
 .el-pagination__jump {
   display: flex;
   align-items: center;
 }
 
-/* 和这个代码一样的CSS跳转输入框标签 */
+/* Pagination jump label */
 .el-pagination__jump label {
   color: #606266;
 }
 
-/* 和这个代码一样的CSS跳转输入框输入框 */
+/* Pagination jump field */
 .el-pagination__jump input {
   width: 50px;
   height: 30px;

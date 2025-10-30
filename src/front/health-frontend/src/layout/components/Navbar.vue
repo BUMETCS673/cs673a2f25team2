@@ -17,13 +17,13 @@
 
         <el-dropdown-menu slot="dropdown" class="user-dropdown">
           <router-link to="/change_Password">
-            <el-dropdown-item> 修改密码 </el-dropdown-item>
+            <el-dropdown-item>Change Password</el-dropdown-item>
           </router-link>
           <a target="_blank" href="wwww.baidu.com">
-            <el-dropdown-item>主页</el-dropdown-item>
+            <el-dropdown-item>Home</el-dropdown-item>
           </a>
           <el-dropdown-item divided @click.native="logout">
-            <span style="display: block">退出账户</span>
+            <span style="display: block">Log Out</span>
           </el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>

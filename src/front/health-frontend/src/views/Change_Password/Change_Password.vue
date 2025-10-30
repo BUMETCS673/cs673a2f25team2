@@ -1,6 +1,6 @@
 <template>
   <div class="register-form">
-    <h1>修改密码</h1>
+    <h1>Change Password</h1>
     <el-form
       :model="form"
       ref="form"
@@ -8,32 +8,32 @@
       label-width="80px"
       class="form"
     >
-      <el-form-item label="用户名" prop="username">
-        <el-input v-model="form.username" placeholder="请输入用户名"></el-input>
+      <el-form-item label="Username" prop="username">
+        <el-input v-model="form.username" placeholder="Please enter username"></el-input>
       </el-form-item>
-      <el-form-item label="当前密码" prop="password">
+      <el-form-item label="Current Password" prop="password">
         <el-input
           v-model="form.password"
           type="password"
-          placeholder="请输入当前密码"
+          placeholder="Please enter current password"
         ></el-input>
       </el-form-item>
-      <el-form-item label="新的密码" prop="newPassword">
+      <el-form-item label="New Password" prop="newPassword">
         <el-input
           v-model="form.newPassword"
           type="password"
-          placeholder="请输入新的密码"
+          placeholder="Please enter new password"
         ></el-input>
       </el-form-item>
-      <el-form-item label="确认密码" prop="confirmNewPassword">
+      <el-form-item label="Confirm Password" prop="confirmNewPassword">
         <el-input
           v-model="form.confirmNewPassword"
           type="password"
-          placeholder="请再次输入新的密码"
+          placeholder="Please re-enter new password"
         ></el-input>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" @click="submitForm">提交</el-button>
+        <el-button type="primary" @click="submitForm">Submit</el-button>
       </el-form-item>
     </el-form>
   </div>
@@ -53,18 +53,18 @@ export default {
       },
       rules: {
         username: [
-          { required: true, message: "请输入用户名", trigger: "blur" },
+          { required: true, message: "Please enter username", trigger: "blur" },
         ],
         password: [
-          { required: true, message: "请输入当前密码", trigger: "blur" },
-          { min: 6, message: "密码长度不能少于6位", trigger: "blur" },
+          { required: true, message: "Please enter current password", trigger: "blur" },
+          { min: 6, message: "Password must be at least 6 characters", trigger: "blur" },
         ],
         newPassword: [
-          { required: true, message: "请输入新的密码", trigger: "blur" },
-          { min: 6, message: "密码长度不能少于6位", trigger: "blur" },
+          { required: true, message: "Please enter new password", trigger: "blur" },
+          { min: 6, message: "Password must be at least 6 characters", trigger: "blur" },
         ],
         confirmNewPassword: [
-          { required: true, message: "确认密码", trigger: "blur" },
+          { required: true, message: "Please confirm password", trigger: "blur" },
           { validator: this.validateConfirmNewPassword, trigger: "blur" },
         ],
       },
@@ -74,18 +74,18 @@ export default {
     submitForm() {
       this.$refs.form.validate((valid) => {
         if (valid) {
-          // 构造请求体
+          // Construct request body
           const requestBody = {
             id: this.id,
             username: this.form.username,
             password: this.form.password,
             newPassword: this.form.newPassword,
           };
-          //提交验证给后台
+          // Submit verification to backend
           userApi
             .changePassword(requestBody)
             .then((response) => {
-              //成功提示
+              // Success message
               this.$message({
                 message: response.message,
                 type: "success",
@@ -94,21 +94,21 @@ export default {
             })
             
             .catch((error) => {
-              //错误提示
+              // Error message
               this.$message({
                 message: error.response.data.message,
                 type: "error",
               });
             });
         } else {
-          //表单校验不通过
+          // Form validation failed
           return false;
         }
       });
     },
     validateConfirmNewPassword(rule, value, callback) {
       if (value !== this.form.newPassword) {
-        callback(new Error("两次输入的密码不一致"));
+        callback(new Error("Passwords do not match"));
       } else {
         callback();
       }
@@ -119,12 +119,12 @@ export default {
         .getUserId()
         .then((response) => {
           console.log(response)
-          // 成功获取用户ID
+          // Successfully retrieved user ID
           this.id = response.data.userId;
-          // 其他逻辑
+          // Other logic
         })
         .catch((error) => {
-          // 处理错误情况
+          // Handle error case
         });
     },
 

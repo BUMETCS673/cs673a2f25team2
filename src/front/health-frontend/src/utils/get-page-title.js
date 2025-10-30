@@ -1,6 +1,6 @@
 import defaultSettings from '@/settings'
 
-const title = defaultSettings.title || '个人健康管理系统'
+const title = defaultSettings.title || 'AI Personal Health Management System'
 
 export default function getPageTitle(pageTitle) {
   if (pageTitle) {

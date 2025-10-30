@@ -7,17 +7,17 @@
             class="search-button"
             icon="el-icon-search"
             @click="showSearchBox"
-            >点击这里进行搜索</el-button
+            >Click here to search</el-button
           >
         </el-col>
       </el-row>
-      <el-dialog title="搜索健康知识" :visible.sync="showDialog">
+      <el-dialog title="Search Health Knowledge" :visible.sync="showDialog">
         <el-input
-          placeholder="请输入你想要的内容"
+          placeholder="Please enter what you want to search"
           v-model="searchText"
         ></el-input>
-        <el-button slot="footer" @click="closeDialog">取消</el-button>
-        <el-button slot="footer" type="primary" @click="Search">搜索</el-button>
+        <el-button slot="footer" @click="closeDialog">Cancel</el-button>
+        <el-button slot="footer" type="primary" @click="Search">Search</el-button>
       </el-dialog>
     </div>
 
@@ -26,13 +26,13 @@
     <div class="grid-container">
       <div class="grid-item" v-for="(sportInfo, index) in sportInfos" :key="index">
         <h2>{{ sportInfo.sportType }}</h2>
-        <p>运动种类：{{ sportInfo.sportType }}</p>
-        <p>适宜时间：{{ sportInfo.suitableTime }}</p>
-        <p>适宜心率：{{ sportInfo.suitableHeartRate }}</p>
-        <p>适宜频率：{{ sportInfo.suitableFrequency }}</p>
-        <p>推荐速度：{{ sportInfo.recommendedSpeed }}</p>
+        <p>Sport Type: {{ sportInfo.sportType }}</p>
+        <p>Suitable Time: {{ sportInfo.suitableTime }}</p>
+        <p>Suitable Heart Rate: {{ sportInfo.suitableHeartRate }}</p>
+        <p>Suitable Frequency: {{ sportInfo.suitableFrequency }}</p>
+        <p>Recommended Speed: {{ sportInfo.recommendedSpeed }}</p>
         <button @click="goToDetail(sportInfo.sportType, sportInfo)">
-          查看详情
+          View Details
         </button>
       </div>
     </div>
@@ -64,10 +64,10 @@ export default {
         .DetailInfo(sportName)
         .then((response) => {
           const detailInfo = response.data;
-          // 将this.DetailInfo与sportInfo合并
+          // Merge this.DetailInfo with sportInfo
           const mergedInfo = { ...detailInfo, ...sportInfo };
           console.log(detailInfo);
-          // 传递参数并跳转
+          // Pass parameters and navigate
           this.$router.push({ path: "/detail", query: mergedInfo });
         })
         .catch((error) => {
@@ -80,17 +80,17 @@ export default {
     },
 
     showSearchBox() {
-      this.searchText = ""; // 重置搜索框
+      this.searchText = ""; // Reset search box
       this.showDialog = true;
     },
 
     async showSearch() {
       try {
         const response = await sportApi.getAllSportInfo();
-        // 取得运动信息数组
+        // Retrieve sport info array
         const sportInfoData = response.data.sportInfos;
         const sportInfos = sportInfoData.slice();
-        // 重构每条运动信息的数据格式
+        // Reconstruct each sport info data structure
         this.sportInfos = sportInfos.map((info) => ({
           id: info.id,
           sportType: info.sportType,
@@ -100,7 +100,7 @@ export default {
           recommendedSpeed: info.recommendedSpeed,
         }));
         this.$message({
-          message: "查询成功",
+          message: "Search successful",
           type: "success",
         });
       } catch (error) {
@@ -116,7 +116,7 @@ export default {
           const filteredSportInfoData = sportInfoData.filter((info) => {
             return info.sportType.includes(this.searchText);
           });
-          // 重构每条运动信息的数据格式
+          // Reconstruct each sport info data structure
           const sportInfos = filteredSportInfoData.map((info) => ({
             id: info.id,
             sportType: info.sportType,
@@ -125,12 +125,12 @@ export default {
             suitableFrequency: info.suitableFrequency,
             recommendedSpeed: info.recommendedSpeed,
           }));
-          // 更新运动信息列表
+          // Update sport info list
           this.sportInfos = sportInfos;
-          // 隐藏搜索框
+          // Hide search dialog
           this.showDialog = false;
           this.$message({
-            message: "查询成功",
+            message: "Search successful",
             type: "success",
           });
         } catch (error) {

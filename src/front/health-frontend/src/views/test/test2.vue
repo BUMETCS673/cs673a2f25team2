@@ -1,69 +1,69 @@
 <template>
   <div class="container">
     <div class="box first-box">
-      <div class="title">身体信息</div>
+      <div class="title">Body Information</div>
       <div class="content" style="margin-left: 15%">
         <div class="info">
-          <div class="label">体重：</div>
+          <div class="label">Weight:</div>
           <div class="value">
             {{ bodyInfo.weight }}<span class="unit">kg</span>
           </div>
         </div>
         <div class="info">
-          <div class="label">身高：</div>
+          <div class="label">Height:</div>
           <div class="value">
             {{ bodyInfo.height }}<span class="unit">m</span>
           </div>
         </div>
         <div class="info">
-          <div class="label">BMI：</div>
+          <div class="label">BMI:</div>
           <div class="value">{{ this.bmiM }}</div>
         </div>
         <div class="info">
-          <div class="label">血糖：</div>
+          <div class="label">Blood Sugar:</div>
           <div class="value">
             {{ bodyInfo.bloodSugar }} <span class="unit">mmol/L</span>
           </div>
         </div>
         <div class="info">
-          <div class="label">血压：</div>
+          <div class="label">Blood Pressure:</div>
           <div class="value">
             {{ bodyInfo.bloodPressure }}<span class="unit">mmHg</span>
           </div>
         </div>
         <div class="info">
-          <div class="label">胆固醇：</div>
+          <div class="label">Cholesterol:</div>
           <div class="value">
             {{ bodyInfo.bloodLipid }} <span class="unit">mmol/l</span>
           </div>
         </div>
         <div class="info">
-          <div class="label">心率：</div>
+          <div class="label">Heart Rate:</div>
           <div class="value">
-            {{ bodyInfo.heartRate }} <span class="unit">次/分钟</span>
+            {{ bodyInfo.heartRate }} <span class="unit">bpm</span>
           </div>
         </div>
         <div class="info">
-          <div class="label">视力：</div>
+          <div class="label">Vision:</div>
           <div class="value">
-            {{ bodyInfo.vision }} <span class="unit">度</span>
+            {{ bodyInfo.vision }} <span class="unit">diopter</span>
           </div>
         </div>
       </div>
     </div>
 
     <div class="box">
-      <div class="title">疾病分析</div>
+      <div class="title">Disease Analysis</div>
       <div id="diseaseChart" class="content">
         <div class="info">
-          <div class="label_vision">可能的疾病：</div>
+          <div class="label_vision">Possible Diseases:</div>
           <div class="value">{{ this.risk }}<span class="unit"></span></div>
         </div>
         <div class="info">
-          <div class="label_vision" style="color: red">注意：</div>
+          <div class="label_vision" style="color: red">Note:</div>
           <div class="value">
             {{
-              "以上风险只是根据您上传的身体数据进行最基本的分析，并不能作为真正的结果，不管有没有风险，都需要保持运动，如有不舒服的地方请马上就医。"
+              "The above risk assessment is based only on your uploaded health data and should not be considered a medical diagnosis. Regardless of risk level, please maintain regular exercise and seek medical attention if you feel unwell."
             }}<span class="unit"></span>
           </div>
         </div>
@@ -71,7 +71,7 @@
     </div>
 
     <div class="box">
-      <div class="title">基础能量消耗状况</div>
+      <div class="title">Basic Energy Consumption</div>
       <el-progress
         type="circle"
         :percentage="Number(this.Standard_hight)"
@@ -86,13 +86,13 @@
         :show-text="true"
       ></el-progress>
       <div style="padding-left: 80px; margin-top: 20px">
-        到达身体年龄的百分比
+        Percentage of Body Age Achieved
       </div>
-      <div style="padding-left: 340px; margin-top: -20px">基本能量消耗</div>
+      <div style="padding-left: 340px; margin-top: -20px">Basic Metabolic Rate</div>
     </div>
 
     <div class="box">
-      <div class="title">肥胖分析</div>
+      <div class="title">Obesity Analysis</div>
       <div class="content">
         <div style="display: flex; justify-content: right">
           <el-progress
@@ -102,47 +102,47 @@
           ></el-progress>
         </div>
         <div class="info" style="margin-top: 30px">
-          <div class="label_vision">根据计算：</div>
+          <div class="label_vision">Based on Calculation:</div>
           <div class="value">{{ determineHealthRisk }}</div>
         </div>
         <div class="info">
-          <div class="label_vision">肥胖可能的风险：</div>
+          <div class="label_vision">Potential Risks of Obesity:</div>
           <div class="value">{{ Disease_risk }}</div>
         </div>
       </div>
     </div>
 
     <div class="box">
-      <div class="title">生活习惯分析</div>
+      <div class="title">Lifestyle Analysis</div>
       <div class="content">
         <div class="info">
-          <div class="label_vision">您的习惯如下：</div>
+          <div class="label_vision">Your Habits:</div>
         </div>
         <div class="value" style="margin-left: 20px">{{ this.habits }}</div>
         <div class="info" style="padding-top: 25px">
-          <div class="label_vision">建议：</div>
+          <div class="label_vision">Recommendation:</div>
           <div class="value">
-            阅读运动知识，更好地了解运动的正确姿势和方法，通过了解运动的原理和科学知识，我们可以更好地制定运动计划，减少运动中的风险和不适，避免受伤和疾病的发生。
+            Read about exercise knowledge to better understand correct techniques and methods. By learning the science behind exercise, you can design effective plans, reduce risks, and avoid injury or illness.
           </div>
         </div>
       </div>
     </div>
 
     <div class="box">
-      <div class="title">视力分析</div>
+      <div class="title">Vision Analysis</div>
       <div class="content">
         <div class="info">
-          <div class="label_vision">您的视力为：</div>
+          <div class="label_vision">Your Vision:</div>
           <div class="value">
             {{ bodyInfo.vision }}<span class="unit"></span>
           </div>
         </div>
         <div class="info">
-          <div class="label_vision">近视等级：</div>
+          <div class="label_vision">Myopia Level:</div>
           <div class="value">{{ visionType }}<span class="unit"></span></div>
         </div>
         <div class="info">
-          <div class="label_vision">建议：</div>
+          <div class="label_vision">Recommendation:</div>
           <div class="value">
             {{ visionSuggestion }}<span class="unit"></span>
           </div>
@@ -151,21 +151,21 @@
     </div>
 
     <div class="box">
-      <div class="title">体型判断</div>
+      <div class="title">Body Type Evaluation</div>
       <div class="content">
         <div class="info">
-          <div class="label_vision">您的体型属于：</div>
+          <div class="label_vision">Your Body Type:</div>
           <div class="value">{{ bodyType }}<span class="unit"></span></div>
         </div>
         <div class="info">
-          <div class="label_vision">建议：</div>
+          <div class="label_vision">Recommendation:</div>
           <div class="value">{{ bodyTypeSuggestion }}</div>
         </div>
       </div>
     </div>
 
     <div class="boxScore">
-      <div class="titleScore">健康评分</div>
+      <div class="titleScore">Health Score</div>
       <div>{{ this.score }}</div>
     </div>
 
@@ -192,11 +192,11 @@ export default {
 
   computed: {
     bmiM() {
-      // 从bodyInfo中获取身高和体重的值，并转换为 Number 类型
+      // Get height and weight from bodyInfo and convert to Number
       const weight = Number(this.bodyInfo.weight);
-      // 计算BMI值
+      // Calculate BMI
       const bmiValue = weight / (this.bodyInfo.height * this.bodyInfo.height);
-      // 返回计算结果并保留两位小数
+      // Return value with two decimals
       this.bmi = bmiValue.toFixed(2);
       return bmiValue.toFixed(2);
     },
@@ -207,65 +207,65 @@ export default {
     visionType() {
       const vision = this.bodyInfo.vision;
       if (vision >= 600) {
-        return "高度近视";
+        return "High Myopia";
       } else if (vision >= 300 && vision <= 600) {
-        return "中度近视";
+        return "Moderate Myopia";
       } else if (vision > 0 && vision <= 300) {
-        return "轻度近视";
+        return "Mild Myopia";
       } else if (vision === 0) {
-        return "没有近视";
+        return "No Myopia";
       }
     },
 
     visionSuggestion() {
       const visionType = this.visionType;
-      if (visionType === "高度近视") {
-        return "积极治疗，建议就医";
-      } else if (visionType === "中度近视") {
-        return "注意保护眼睛，建议定期检查视力";
-      } else if (visionType === "轻度近视") {
-        return "加强锻炼，注意用眼卫生";
-      } else if (visionType === "没有近视") {
-        return "很好，保持生活习惯，注意保护眼睛";
+      if (visionType === "High Myopia") {
+        return "Seek medical treatment promptly.";
+      } else if (visionType === "Moderate Myopia") {
+        return "Protect your eyes and have regular vision checkups.";
+      } else if (visionType === "Mild Myopia") {
+        return "Do eye exercises and maintain eye hygiene.";
+      } else if (visionType === "No Myopia") {
+        return "Great! Maintain good habits and protect your eyes.";
       }
     },
 
     bodyType() {
       if (this.bmiM >= 28) {
-        return "肥胖型";
+        return "Obese";
       } else if (this.bmiM > 24 && this.bmiM <= 28) {
-        return "超重体型";
+        return "Overweight";
       } else if (this.bmiM >= 0 && this.bmiM <= 24) {
-        return "正常体型";
+        return "Normal";
       }
     },
 
     determineHealthRisk() {
       if (this.bmiM >= 28) {
-        return "您的体重太大了，请马上减肥";
+        return "Your weight is too high; please lose weight immediately.";
       } else if (this.bmiM > 24 && this.bmiM <= 28) {
-        return "您的体重过大，请及时减肥";
+        return "Your weight is above normal; consider reducing it soon.";
       } else if (this.bmiM >= 0 && this.bmiM <= 24) {
-        return "您的体重正常，请保持健康生活";
+        return "Your weight is normal; maintain a healthy lifestyle.";
       }
     },
     Disease_risk() {
       if (this.bmiM >= 28) {
-        return "心脏病、中风、高血压和高胆固醇，增加心脏病，还有糖尿病、呼吸系统疾病、关节炎等风险";
+        return "High risk of heart disease, stroke, hypertension, high cholesterol, diabetes, respiratory problems, and arthritis.";
       } else if (this.bmiM > 24 && this.bmiM <= 28) {
-        return "容易导致高血压、高胆固醇、心脏病、中风、患糖尿病的风险，胰岛素分泌异常以及呼吸系统疾病";
+        return "Increased risk of hypertension, cholesterol, heart disease, stroke, diabetes, insulin irregularities, and respiratory issues.";
       } else if (this.bmiM >= 0 && this.bmiM <= 24) {
-        return "风险不大，但是要保证摄入足够的蛋白质、碳水化合物和脂肪";
+        return "Low risk, but ensure sufficient intake of protein, carbohydrates, and fats.";
       }
     },
 
     bodyTypeSuggestion() {
-      if (this.bodyType === "肥胖型") {
-        return "控制饮食，增加运动量，并寻求专业医师的指导。";
-      } else if (this.bodyType === "超重体型") {
-        return "注意饮食健康，控制摄入量，并加强有氧运动，提高身体代谢率。";
-      } else if (this.bodyType === "正常体型") {
-        return "保持良好的生活习惯，适当参加运动，均衡饮食，保持身体健康。";
+      if (this.bodyType === "Obese") {
+        return "Control your diet, increase physical activity, and seek professional medical advice.";
+      } else if (this.bodyType === "Overweight") {
+        return "Maintain healthy eating habits, control intake, and strengthen aerobic exercise.";
+      } else if (this.bodyType === "Normal") {
+        return "Maintain a balanced lifestyle, exercise regularly, and eat well.";
       }
     },
   },
@@ -273,7 +273,7 @@ export default {
   methods: {
     async getBodyInfo() {
       try {
-        // 使用解构赋值从 userApi.getBodyInfo() 返回的 Promise 对象中提取 data.bodyList 数组的第一个元素（即 bodyInfo 对象）
+        // Use destructuring to get bodyInfo from userApi.getBodyInfo()
         const {
           data: {
             bodyList: [bodyInfo],
@@ -281,126 +281,126 @@ export default {
         } = await userApi.getBodyInfo();
         this.bodyInfo = bodyInfo;
       } catch (error) {
-        console.log("获取身体信息错误");
+        console.log("Error fetching body information");
       }
     },
 
     habits_customs() {
       let habits = [];
       this.habits_count = habits;
-      // 判断膳食习惯
+      // Dietary preferences
       if (this.bodyInfo.foodTypes === "蔬菜") {
-        habits.push("爱吃蔬菜");
+        habits.push("Prefers vegetables");
       }
       if (this.bodyInfo.foodTypes === "水果") {
-        habits.push("爱吃水果");
+        habits.push("Prefers fruits");
       }
       if (this.bodyInfo.foodTypes === "肉类") {
-        habits.push("爱吃肉");
+        habits.push("Prefers meat");
       }
       if (this.bodyInfo.foodTypes === "鱼类") {
-        habits.push("爱吃鱼");
+        habits.push("Prefers fish");
       }
       if (this.bodyInfo.foodTypes === "豆类") {
-        habits.push("爱吃豆类");
+        habits.push("Prefers legumes");
       }
       if (this.bodyInfo.foodTypes === "谷物") {
-        habits.push("爱吃五谷");
+        habits.push("Prefers grains");
       }
 
       if (this.bodyInfo.bloodSugar > 7) {
-        habits.push("摄入的糖分和生活习惯不好");
+        habits.push("High sugar intake and poor lifestyle habits");
       } else {
-        habits.push("血糖水平正常");
+        habits.push("Normal blood sugar level");
       }
 
       if (this.bodyInfo.bloodPressure > 5.2) {
-        habits.push("高胆固醇饮食");
+        habits.push("High cholesterol diet");
       } else {
-        habits.push("低胆固醇饮食");
+        habits.push("Low cholesterol diet");
       }
 
       if (this.bodyInfo.heartRate > 100) {
-        habits.push("经常紧张焦虑和压力");
+        habits.push("Frequent stress and anxiety");
       } else {
-        habits.push("心情还不错");
+        habits.push("Good mood");
       }
 
       if (this.bodyInfo.vision > 50) {
-        habits.push("熬夜过多过度劳累");
+        habits.push("Overworked and staying up late");
       } else {
-        habits.push("准时睡觉");
+        habits.push("Goes to bed on time");
       }
 
       if (this.bodyInfo.sleepDuration < 8) {
-        habits.push("睡眠不足");
+        habits.push("Insufficient sleep");
       } else {
-        habits.push("睡眠充足");
+        habits.push("Sufficient sleep");
       }
 
       if (this.bodyInfo.sleepQuality === "好") {
-        habits.push("熬夜过多过度劳累");
+        habits.push("Overworked and staying up late");
       } else if (this.bodyInfo.sleepQuality === "一般") {
-        habits.push("需要注意睡眠质量");
+        habits.push("Needs to improve sleep quality");
       } else if (this.bodyInfo.sleepQuality === "差") {
-        habits.push("需要改善睡眠质量");
+        habits.push("Should improve sleep quality");
       }
       if (this.bodyInfo.smoking === true) {
-        habits.push("吸烟");
+        habits.push("Smokes");
       } else {
-        habits.push("不吸烟");
+        habits.push("Does not smoke");
       }
 
       if (this.bodyInfo.drinking === true) {
-        habits.push("饮酒");
+        habits.push("Drinks alcohol");
       } else {
-        habits.push("未饮酒");
+        habits.push("Does not drink");
       }
       if (this.bodyInfo.exercise === true) {
-        habits.push("积极锻炼");
+        habits.push("Exercises regularly");
       } else {
-        habits.push("缺乏运动");
+        habits.push("Lack of exercise");
       }
 
       if (this.bodyInfo.waterConsumption < 1000) {
-        habits.push("饮水不足");
+        habits.push("Insufficient water intake");
       } else {
-        habits.push("饮水充足");
+        habits.push("Adequate water intake");
       }
 
-      this.habits = habits.join("，");
+      this.habits = habits.join(", ");
     },
 
     diseaserisk() {
       if (this.bodyInfo.bloodPressure >= 90) {
-        this.risk += "高血压，";
+        this.risk += "Hypertension, ";
       }
       if (this.bodyInfo.bloodLipid > 3) {
-        this.risk += "高血脂，";
+        this.risk += "Hyperlipidemia, ";
       }
       if (this.bodyInfo.bloodSugar > 6.1) {
-        this.risk += "糖尿病，";
+        this.risk += "Diabetes, ";
       }
       if (this.bodyInfo.drinking > 3) {
-        this.risk += "酗酒，";
+        this.risk += "Alcoholism, ";
       }
       if (this.bodyInfo.exercise < 3) {
-        this.risk += "缺乏运动，";
+        this.risk += "Lack of Exercise, ";
       }
       if (this.bodyInfo.heartRate > 100) {
-        this.risk += "心率过快，";
+        this.risk += "Tachycardia, ";
       }
       if (this.bodyInfo.sleepDuration < 7 || this.bodyInfo.sleepQuality < 3) {
-        this.risk += "睡眠不足，";
+        this.risk += "Sleep deprivation, ";
       }
       if (this.bodyInfo.smoking > 0) {
-        this.risk += "肺炎，";
+        this.risk += "Pneumonia, ";
       }
       if (this.bodyInfo.vision <= 300) {
-        this.risk += "近视，";
+        this.risk += "Myopia, ";
       }
       if (this.bodyInfo.waterConsumption < 1500) {
-        this.risk += "结石";
+        this.risk += "Kidney Stones";
       }
     },
 
