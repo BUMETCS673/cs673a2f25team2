@@ -1,4 +1,3 @@
-<!-- 搜索框和添加按钮，搜索框，以及用户名和手机号的输入框 -->
 <template>
   <div>
     <el-card id="search">
@@ -7,7 +6,7 @@
           <!-- v-model绑定组件实现双向数据绑定，页面上用户输入的值会同步更新到该属性中 -->
           <el-input
             v-model="searchModel.sportType"
-            placeholder="运动类型"
+            placeholder="Sport Type"
             clearable
           ></el-input>
           <el-button
@@ -15,7 +14,7 @@
             type="primary"
             round
             icon="el-icon-search"
-            >查询</el-button
+            >Search</el-button
           >
         </el-col>
         <el-col :span="1">
@@ -34,40 +33,40 @@
       <el-table :data="sportList" stripe style="width: 100%">
         <el-table-column
           type="index"
-          label="序号"
+          label="No."
           width="180"
         ></el-table-column>
         <el-table-column prop="id" label="ID" width="150"></el-table-column>
         <el-table-column
           prop="sportType"
-          label="运动类型"
+          label="Sport Type"
           width="150"
         ></el-table-column>
         <el-table-column
           prop="suitableFrequency"
-          label="运动频率"
+          label="Frequency"
           width="150"
         ></el-table-column>
 
         <el-table-column
           prop="suitableTime"
-          label="运动时间"
+          label="Duration"
           width="150"
         ></el-table-column>
 
         <el-table-column
           prop="recommendedSpeed"
-          label="运动速度"
+          label="Speed"
           width="150"
         ></el-table-column>
 
         <el-table-column
           prop="suitableHeartRate"
-          label="运动心率"
+          label="Heart Rate"
           width="150"
         ></el-table-column>
 
-        <el-table-column label="操作" width="180">
+        <el-table-column label="Actions" width="180">
           <!-- 删除和修改按钮 -->
           <template slot-scope="scope">
             <el-button
@@ -106,34 +105,34 @@
       :visible.sync="dialogFormVisible"
     >
       <el-form :model="sportForm" ref="sportFormRef" >
-        <el-form-item label="运动类型" prop="sportType" :label-width="formLabelWidth">
+        <el-form-item label="Sport Type" prop="sportType" :label-width="formLabelWidth">
           <el-input v-model="sportForm.sportType" autocomplete="off"></el-input>
         </el-form-item>
 
         <el-form-item
-           label="运动频率" prop="suitableFrequency" :label-width="formLabelWidth">
+           label="Frequency" prop="suitableFrequency" :label-width="formLabelWidth">
           <el-input v-model="sportForm.suitableFrequency" autocomplete="off"></el-input>
         </el-form-item>
 
-        <el-form-item label="运动时间" prop="suitableTime" :label-width="formLabelWidth">
+        <el-form-item label="Duration" prop="suitableTime" :label-width="formLabelWidth">
           <el-input v-model="sportForm.suitableTime" autocomplete="off"></el-input>
         </el-form-item>
 
         <el-form-item
-          label="运动速度" prop="emrecommendedSpeedail" :label-width="formLabelWidth">
+          label="Speed" prop="emrecommendedSpeedail" :label-width="formLabelWidth">
           <el-input v-model="sportForm.recommendedSpeed" autocomplete="off"></el-input>
         </el-form-item>
 
         <el-form-item
-          label="运动心率" prop="suitableHeartRate" :label-width="formLabelWidth">
+          label="Heart Rate" prop="suitableHeartRate" :label-width="formLabelWidth">
           <el-input v-model="sportForm.suitableHeartRate" autocomplete="off"></el-input>
         </el-form-item>
 
       </el-form>
 
       <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="saveSport">确 定</el-button>
+        <el-button @click="dialogFormVisible = false">Cancel</el-button>
+        <el-button type="primary" @click="saveSport">Confirm</el-button>
       </div>
     </el-dialog>
   </div>
@@ -145,24 +144,24 @@ export default {
   data() {
   
     return {
-      sportForm: {}, //初始化为一个空对象
+      sportForm: {}, // Initialize as an empty object
       sportList:[],
-      //左边宽度
+      // Label column width
       formLabelWidth: "135px",
-      //设置默认值不可见
+      // Dialog hidden by default
       dialogFormVisible: false,
       title: "",
       total: 0,
       searchModel: {
         pageNo: 1,
-        // 默认显示数量
+        // Default page size
         pageSize: 10,
       },
-      //表单规则配置
+      // Form validation rules
 
       rules: {
         sportType: [
-          { required: true, message: "请输入运动类型", trigger: "blur" }
+          { required: true, message: "Please enter a sport type", trigger: "blur" }
         ]
       },
     };
@@ -171,24 +170,24 @@ export default {
   methods: {
     saveSport() {
       let isOk = true;
-      //触发表单的验证
+      // Trigger form validation
       this.$refs.sportFormRef.validate((valid) => {
-        // 这边只有校验失败的时候才会进来,在外面定义一个 isok,校验失败会将他改成 false
+        // Validation only fails inside callback; define isOk outside to track result
         isOk = valid;
       });
 
       if (isOk) {
-        //提交验证给后台
+        // Submit form to backend
         console.log(this.sportForm)
         sportApi.saveSport(this.sportForm).then((response) => {
-          //成功提示
+          // Success message
           this.$message({
             message: response.message,
             type: "success",
           });
-          //关闭对话框
+          // Close dialog
           this.dialogFormVisible = false;
-          //刷新表格数据
+          // Refresh table
           this.getSportList();
         });
       } else {
@@ -197,15 +196,15 @@ export default {
       }
     },
 
-    //清理表单数据
+    // Clear form data
     clearForm() {
       this.sportForm = {
       };
-      //清除表单校验的提示信息
+      // Clear validation messages
       this.$refs.sportFormRef.clearValidate();
     },
     handleSizeChange(pageSize) {
-      //数据更新
+      // Update data
       this.searchModel.pageSize = pageSize;
       this.getSportList();
     },
@@ -220,9 +219,9 @@ export default {
     getSportList() {
       sportApi.getSportList(this.searchModel).then((response) => {
         console.log(response)
-        // 将查询结果中的 rows 属性赋值给 sportList
+        // Assign response rows to sportList
         this.sportList = response.data.rows;
-        // 将查询结果中的 total 属性赋值给 total
+        // Assign response total to total
         this.total = response.data.total;
         console.log(this.sportList)
       });
@@ -233,10 +232,10 @@ export default {
     openEditUi(id) {
       console.log(id)
       if (id == null) {
-        this.title = "新增运动信息";
+        this.title = "Add Exercise Info";
       } else {
-        this.title = "修改运动信息";
-        //根据id查询用户数据
+        this.title = "Edit Exercise Info";
+        // Fetch exercise info by ID
         sportApi.getSportById(id).then((response) => {
           this.sportForm = response.data;
           console.log(this.sportForm)
@@ -247,9 +246,9 @@ export default {
 
 
     deleteSport(sport) {
-      this.$confirm(`确认删除 ${sport.sportType} 这个运动信息吗？`, "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
+      this.$confirm(`Delete exercise info ${sport.sportType}?`, "Confirm", {
+        confirmButtonText: "OK",
+        cancelButtonText: "Cancel",
         type: "warning",
       })
         .then(() => {
@@ -264,14 +263,14 @@ export default {
         .catch(() => {
           this.$message({
             type: "info",
-            message: "已取消删除",
+            message: "Deletion cancelled",
           });
         });
     },
   },
 
   
-  //加载时就查询一次
+  // Fetch list on component load
   created() {
     this.getSportList();
   },
@@ -286,7 +285,7 @@ export default {
   width: 43%;
 }
 
-/* 很美观的CSS样式 */
+/* Styled CSS */
 /* body {
     background: linear-gradient(to right, lightblue, lightpink);
     margin: 0;
@@ -294,7 +293,7 @@ export default {
     font-family: Arial, Helvetica, sans-serif;
   } */
 
-/* 很美观的CSS卡片 */
+/* Styled CSS card */
 .el-card {
   width: 80%;
   margin: 20px auto;
@@ -303,13 +302,13 @@ export default {
   overflow: hidden;
 }
 
-/* 很美观的CSS表格 */
+/* Styled CSS table */
 .el-table {
   width: 100%;
   border-collapse: collapse;
 }
 
-/* 很美观的CSS表格标题 */
+/* Styled CSS table header */
 .el-table-column {
   background-color: lightblue;
   color: white;
@@ -318,7 +317,7 @@ export default {
   text-align: center;
 }
 
-/* 很美观的CSS表格数据 */
+/* Styled CSS table cells */
 .el-table-column[type="index"],
 .el-table-column[prop="id"],
 .el-table-column[prop="username"],
@@ -331,7 +330,7 @@ export default {
   text-align: center;
 }
 
-/* 很美观的CSS表格数据悬停效果 */
+/* Styled CSS hover effect */
 .el-table-column[type="index"]:hover,
 .el-table-column[prop="id"]:hover,
 .el-table-column[prop="username"]:hover,
@@ -341,12 +340,12 @@ export default {
   color: white;
 }
 
-/* 很美观的CSS按钮悬停效果 */
+/* Styled CSS button hover */
 .el-button:hover {
   transform: scale(1.2);
 }
 
-/* 和这个代码一样的CSS */
+/* Pagination CSS */
 .el-pagination {
   display: flex;
   align-items: center;
@@ -354,45 +353,45 @@ export default {
   margin: 20px;
 }
 
-/* 和这个代码一样的CSS总数 */
+/* Pagination total label */
 .el-pagination__total {
   color: #606266;
   margin-right: 20px;
 }
 
-/* 和这个代码一样的CSS每页显示条数 */
+/* Pagination page size */
 .el-pagination__sizes {
   display: flex;
   align-items: center;
   margin-right: 20px;
 }
 
-/* 和这个代码一样的CSS每页显示条数选择器 */
+/* Pagination page size selector */
 .el-pagination__sizes .el-select {
   width: 100px;
 }
 
-/* 和这个代码一样的CSS上一页按钮 */
+/* Pagination previous button */
 .el-pagination__prev {
   display: flex;
   align-items: center;
   margin-right: 10px;
 }
 
-/* 和这个代码一样的CSS上一页按钮图标 */
+/* Pagination previous icon */
 .el-pagination__prev .el-icon {
   font-size: 20px;
   color: #409eff;
 }
 
-/* 和这个代码一样的CSS页码 */
+/* Pagination pager */
 .el-pagination__pager {
   display: flex;
   align-items: center;
   margin-right: 10px;
 }
 
-/* 和这个代码一样的CSS页码按钮 */
+/* Pagination page button */
 .el-pagination__pager button {
   width: 30px;
   height: 30px;
@@ -404,43 +403,43 @@ export default {
   transition: all 0.3s ease-in-out;
 }
 
-/* 和这个代码一样的CSS页码按钮悬停效果 */
+/* Pagination hover button */
 .el-pagination__pager button:hover {
   background-color: #409eff;
   color: white;
 }
 
-/* 和这个代码一样的CSS当前页码按钮 */
+/* Pagination active button */
 .el-pagination__pager button.is-active {
   background-color: #409eff;
   color: white;
 }
 
-/* 和这个代码一样的CSS下一页按钮 */
+/* Pagination next button */
 .el-pagination__next {
   display: flex;
   align-items: center;
   margin-right: 10px;
 }
 
-/* 和这个代码一样的CSS下一页按钮图标 */
+/* Pagination next icon */
 .el-pagination__next .el-icon {
   font-size: 20px;
   color: #409eff;
 }
 
-/* 和这个代码一样的CSS跳转输入框 */
+/* Pagination jump input */
 .el-pagination__jump {
   display: flex;
   align-items: center;
 }
 
-/* 和这个代码一样的CSS跳转输入框标签 */
+/* Pagination jump label */
 .el-pagination__jump label {
   color: #606266;
 }
 
-/* 和这个代码一样的CSS跳转输入框输入框 */
+/* Pagination jump field */
 .el-pagination__jump input {
   width: 50px;
   height: 30px;

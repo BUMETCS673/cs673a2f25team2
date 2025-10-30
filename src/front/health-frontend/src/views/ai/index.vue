@@ -3,7 +3,7 @@
     <div class="chat-view">
       <div class="chat-panel">
         <div class="message-panel">
-          <!-- 消息列表 -->
+          <!-- Message list -->
           <div class="message-list" ref="messageContainer">
             <div
               v-for="(message, index) in messages"
@@ -22,17 +22,17 @@
             </div>
           </div>
 
-          <!-- 输入区域 -->
+          <!-- Input area -->
           <div class="message-input">
             <el-input
               v-model="userInput"
               type="textarea"
               :rows="3"
-              placeholder="请输入您的问题..."
+              placeholder="Please enter your question..."
               @keyup.enter.native="sendMessage"
             />
             <el-button type="primary" @click="sendMessage" :loading="loading">
-              发送
+              Send
             </el-button>
           </div>
         </div>
@@ -49,7 +49,7 @@ export default {
       messages: [
         {
           type: 'ai',
-          content: '你好！我是您的AI健康助手，请问有什么可以帮您的吗？（输入“AI健康建议” 会根据用户历史健康数据给出建议！）'
+          content: 'Hello! I am your AI Health Assistant. How can I help you today? (Type "AI Health Advice" to receive suggestions based on your historical health data!)'
         }
       ],
       userInput: '',
@@ -100,7 +100,7 @@ export default {
           console.log('WebSocket连接已建立')
           this.isConnected = true
           this.reconnectAttempts = 0
-          this.$message.success('已连接到AI助手服务')
+          this.$message.success('Connected to AI Assistant service')
         }
 
         // 接收消息
@@ -123,14 +123,14 @@ export default {
               }
             }
           } catch (error) {
-            console.error('处理WebSocket消息时出错:', error)
-            this.$message.error('消息处理出错')
+            console.error('Error processing WebSocket message:', error)
+            this.$message.error('Message processing error')
           }
         }
 
         // 错误处理
         this.socket.onerror = (error) => {
-          console.error('WebSocket错误:', error)
+          console.error('WebSocket error:', error)
           this.isConnected = false
           this.handleReconnect()
         }
@@ -145,20 +145,20 @@ export default {
         }
       } catch (error) {
         console.error('WebSocket创建失败:', error)
-        this.$message.error(`连接失败: ${error.message}`)
+        this.$message.error(`Connection failed: ${error.message}`)
         this.handleReconnect()
       }
     },
     handleReconnect() {
       if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-        this.$message.error('无法连接到AI助手服务，请稍后再试')
+        this.$message.error('Unable to connect to AI Assistant service, please try again later')
         this.isConnected = false
         return
       }
 
       this.reconnectAttempts++
       const nextAttemptIn = this.reconnectInterval / 1000
-      this.$message.warning(`连接失败，${nextAttemptIn}秒后尝试第${this.reconnectAttempts}次重连...`)
+      this.$message.warning(`Connection failed, retrying in ${nextAttemptIn} seconds (attempt ${this.reconnectAttempts})...`)
 
       setTimeout(() => {
         this.setupWebSocket()
@@ -176,7 +176,7 @@ export default {
 
       // 检查连接状态
       if (!this.isConnected) {
-        this.$message.warning('正在连接到AI助手服务...')
+        this.$message.warning('Connecting to AI Assistant service...')
         this.setupWebSocket()
         return
       }
@@ -215,7 +215,7 @@ export default {
         }
       } catch (error) {
         console.error('发送消息失败:', error)
-        this.$message.error('发送失败，请重试')
+        this.$message.error('Failed to send, please try again')
         this.loading = false
         // 移除空的AI消息
         this.messages.pop()
@@ -327,4 +327,3 @@ export default {
   align-self: flex-end;
 }
 </style>
-

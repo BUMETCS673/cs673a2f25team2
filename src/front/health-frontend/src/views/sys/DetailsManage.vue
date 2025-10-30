@@ -1,4 +1,4 @@
-<!-- 搜索框和添加按钮，搜索框，以及用户名和手机号的输入框 -->
+<!-- Search box and Add button; includes search input and basic fields -->
 <template>
     <div>
       <el-card id="search">
@@ -7,7 +7,7 @@
             <!-- v-model绑定组件实现双向数据绑定，页面上用户输入的值会同步更新到该属性中 -->
             <el-input
               v-model="searchModel.sportType"
-              placeholder="运动类型"
+              placeholder="Sport Type"
               clearable
             ></el-input>
             <el-button
@@ -15,7 +15,7 @@
               type="primary"
               round
               icon="el-icon-search"
-              >查询</el-button
+              >Search</el-button
             >
           </el-col>
           <el-col :span="1">
@@ -34,34 +34,34 @@
         <el-table :data="detailList" stripe style="width: 100%">
           <el-table-column
             type="index"
-            label="序号"
+            label="No."
             width="180"
           ></el-table-column>
           <el-table-column prop="id" label="ID" width="180"></el-table-column>
           <el-table-column
             prop="sportType"
-            label="运动类型"
+            label="Sport Type"
             width="180"
           ></el-table-column>
           <el-table-column
             prop="disease"
-            label="禁忌疾病"
+            label="Contraindicated Conditions"
             width="180"
           ></el-table-column>
 
           <el-table-column
             prop="method"
-            label="运动方法"
+            label="Exercise Method"
             width="180"
           ></el-table-column>
 
           <el-table-column
             prop="notes"
-            label="注意事项"
+            label="Notes"
             width="180"
           ></el-table-column>
 
-          <el-table-column label="操作" width="180">
+          <el-table-column label="Actions" width="180">
             <!-- 删除和修改按钮 -->
             <template slot-scope="scope">
               <el-button
@@ -93,28 +93,28 @@
       >
       </el-pagination>
 
-      <!-- 用户编辑信息弹出框 -->
+      <!-- Detail edit dialog -->
       <el-dialog
         @close="clearForm"
         :title="title"
         :visible.sync="dialogFormVisible"
       >
         <el-form :model="detailForm" ref="detailFormRef" >
-          <el-form-item label="运动类型" prop="sportType" :label-width="formLabelWidth">
+          <el-form-item label="Sport Type" prop="sportType" :label-width="formLabelWidth">
             <el-input v-model="detailForm.sportType" autocomplete="off"></el-input>
           </el-form-item>
 
           <el-form-item
-             label="禁忌疾病" prop="disease" :label-width="formLabelWidth">
+             label="Contraindicated Conditions" prop="disease" :label-width="formLabelWidth">
             <el-input v-model="detailForm.disease" autocomplete="off"></el-input>
           </el-form-item>
 
-          <el-form-item label="运动方法" prop="method" :label-width="formLabelWidth">
+          <el-form-item label="Exercise Method" prop="method" :label-width="formLabelWidth">
             <el-input v-model="detailForm.method" autocomplete="off"></el-input>
           </el-form-item>
 
           <el-form-item
-            label="注意事项" prop="notes" :label-width="formLabelWidth">
+            label="Notes" prop="notes" :label-width="formLabelWidth">
             <el-input v-model="detailForm.notes" autocomplete="off"></el-input>
           </el-form-item>
 
@@ -122,8 +122,8 @@
         </el-form>
 
         <div slot="footer" class="dialog-footer">
-          <el-button @click="dialogFormVisible = false">取 消</el-button>
-          <el-button type="primary" @click="saveDetail">确 定</el-button>
+          <el-button @click="dialogFormVisible = false">Cancel</el-button>
+          <el-button type="primary" @click="saveDetail">Confirm</el-button>
         </div>
       </el-dialog>
     </div>
@@ -135,24 +135,23 @@
     data() {
 
       return {
-        detailForm: {}, //初始化为一个空对象
+        detailForm: {}, // initialize as empty object
         detailList:[],
-        //左边宽度
+        // label width
         formLabelWidth: "135px",
-        //设置默认值不可见
+        // dialog hidden by default
         dialogFormVisible: false,
         title: "",
         total: 0,
         searchModel: {
           pageNo: 1,
-          // 默认显示数量
+          // default page size
           pageSize: 10,
         },
-        //表单规则配置
-
+        // form rules
         rules: {
           sportType: [
-            { required: true, message: "请输入运动类型", trigger: "blur" }
+            { required: true, message: "Please enter a sport type", trigger: "blur" }
           ]
         },
       };
@@ -187,15 +186,15 @@
         }
       },
 
-      //清理表单数据
+      // clear form data
       clearForm() {
         this.detailForm = {
         };
-        //清除表单校验的提示信息
+        // clear form validation
         this.$refs.detailFormRef.clearValidate();
       },
       handleSizeChange(pageSize) {
-        //数据更新
+        // update data
         this.searchModel.pageSize = pageSize;
         this.getDetailList();
       },
@@ -206,7 +205,7 @@
 
 
 
-      //用于查询用户列表
+      // for querying detail list
       getDetailList() {
         sportApi.getDetailList(this.searchModel).then((response) => {
           this.detailList = response.data.rows;
@@ -219,10 +218,10 @@
       openEditUi(id) {
         console.log(id)
         if (id == null) {
-          this.title = "新增运动详情";
+          this.title = "Add Exercise Detail";
         } else {
-          this.title = "修改运动详情";
-          //根据id查询用户数据
+          this.title = "Edit Exercise Detail";
+          // query detail by id
           sportApi.getDetailById(id).then((response) => {
             this.detailForm = response.data;
             console.log(this.detailForm)
@@ -233,9 +232,9 @@
 
 
       deleteDetail(detail) {
-        this.$confirm(`确认删除 ${detail.sportType} 这个运动详情吗？`, "提示", {
-          confirmButtonText: "确定",
-          cancelButtonText: "取消",
+        this.$confirm(`Delete exercise detail "${detail.sportType}"?`, "Confirm", {
+          confirmButtonText: "OK",
+          cancelButtonText: "Cancel",
           type: "warning",
         })
           .then(() => {
@@ -250,7 +249,7 @@
           .catch(() => {
             this.$message({
               type: "info",
-              message: "已取消删除",
+              message: "Deletion cancelled",
             });
           });
       },
@@ -272,7 +271,7 @@
     width: 43%;
   }
 
-  /* 很美观的CSS样式 */
+  /* Styled CSS */
   /* body {
       background: linear-gradient(to right, lightblue, lightpink);
       margin: 0;
@@ -280,7 +279,7 @@
       font-family: Arial, Helvetica, sans-serif;
     } */
 
-  /* 很美观的CSS卡片 */
+  /* Styled CSS card */
   .el-card {
     width: 80%;
     margin: 20px auto;
@@ -289,13 +288,13 @@
     overflow: hidden;
   }
 
-  /* 很美观的CSS表格 */
+  /* Styled CSS table */
   .el-table {
     width: 100%;
     border-collapse: collapse;
   }
 
-  /* 很美观的CSS表格标题 */
+  /* Styled CSS table header */
   .el-table-column {
     background-color: lightblue;
     color: white;
@@ -304,7 +303,7 @@
     text-align: center;
   }
 
-  /* 很美观的CSS表格数据 */
+  /* Styled CSS table cells */
   .el-table-column[type="index"],
   .el-table-column[prop="id"],
   .el-table-column[prop="username"],
@@ -317,7 +316,7 @@
     text-align: center;
   }
 
-  /* 很美观的CSS表格数据悬停效果 */
+  /* Styled CSS table hover */
   .el-table-column[type="index"]:hover,
   .el-table-column[prop="id"]:hover,
   .el-table-column[prop="username"]:hover,
@@ -327,12 +326,12 @@
     color: white;
   }
 
-  /* 很美观的CSS按钮悬停效果 */
+  /* Styled CSS button hover */
   .el-button:hover {
     transform: scale(1.2);
   }
 
-  /* 和这个代码一样的CSS */
+  /* CSS consistent with this code */
   .el-pagination {
     display: flex;
     align-items: center;
@@ -340,45 +339,45 @@
     margin: 20px;
   }
 
-  /* 和这个代码一样的CSS总数 */
+  /* CSS total label */
   .el-pagination__total {
     color: #606266;
     margin-right: 20px;
   }
 
-  /* 和这个代码一样的CSS每页显示条数 */
+  /* CSS page size */
   .el-pagination__sizes {
     display: flex;
     align-items: center;
     margin-right: 20px;
   }
 
-  /* 和这个代码一样的CSS每页显示条数选择器 */
+  /* CSS page size selector */
   .el-pagination__sizes .el-select {
     width: 100px;
   }
 
-  /* 和这个代码一样的CSS上一页按钮 */
+  /* CSS prev button */
   .el-pagination__prev {
     display: flex;
     align-items: center;
     margin-right: 10px;
   }
 
-  /* 和这个代码一样的CSS上一页按钮图标 */
+  /* CSS prev icon */
   .el-pagination__prev .el-icon {
     font-size: 20px;
     color: #409eff;
   }
 
-  /* 和这个代码一样的CSS页码 */
+  /* CSS pager */
   .el-pagination__pager {
     display: flex;
     align-items: center;
     margin-right: 10px;
   }
 
-  /* 和这个代码一样的CSS页码按钮 */
+  /* CSS pager button */
   .el-pagination__pager button {
     width: 30px;
     height: 30px;
@@ -390,43 +389,43 @@
     transition: all 0.3s ease-in-out;
   }
 
-  /* 和这个代码一样的CSS页码按钮悬停效果 */
+  /* CSS pager button hover */
   .el-pagination__pager button:hover {
     background-color: #409eff;
     color: white;
   }
 
-  /* 和这个代码一样的CSS当前页码按钮 */
+  /* CSS active page button */
   .el-pagination__pager button.is-active {
     background-color: #409eff;
     color: white;
   }
 
-  /* 和这个代码一样的CSS下一页按钮 */
+  /* CSS next button */
   .el-pagination__next {
     display: flex;
     align-items: center;
     margin-right: 10px;
   }
 
-  /* 和这个代码一样的CSS下一页按钮图标 */
+  /* CSS next icon */
   .el-pagination__next .el-icon {
     font-size: 20px;
     color: #409eff;
   }
 
-  /* 和这个代码一样的CSS跳转输入框 */
+  /* CSS jump input */
   .el-pagination__jump {
     display: flex;
     align-items: center;
   }
 
-  /* 和这个代码一样的CSS跳转输入框标签 */
+  /* CSS jump input label */
   .el-pagination__jump label {
     color: #606266;
   }
 
-  /* 和这个代码一样的CSS跳转输入框输入框 */
+  /* CSS jump input field */
   .el-pagination__jump input {
     width: 50px;
     height: 30px;

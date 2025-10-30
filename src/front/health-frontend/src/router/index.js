@@ -50,7 +50,7 @@ export const constantRoutes = [
       path: 'dashboard',
       name: 'Dashboard',
       component: () => import('@/views/dashboard/index'),
-      meta: { title: '首页', icon: 'dashboard',affix: true }
+      meta: { title: 'Dashboard', icon: 'dashboard', affix: true }
     }]
   },
 
@@ -87,7 +87,7 @@ export const constantRoutes = [
         path: 'assistant',
         name: 'AiAssistant',
         component: () => import('@/views/ai/index'),
-        meta: { title: 'AI助手', icon: 'el-icon-s-help' }
+        meta: { title: 'AI Assistant', icon: 'el-icon-s-help' }
       }
     ]
   },

@@ -2,7 +2,7 @@
   <div class="box_Detail">
     <div class="top_area">
       <p @click="home" style="cursor: pointer">
-        <i class="el-icon-s-home"></i>返回主页
+        <i class="el-icon-s-home"></i>Back to Home
       </p>
     </div>
     <div class="box1">
@@ -41,46 +41,46 @@
       ></el-image>
 
       <div class="info1">
-        <div class="info-item"><h1>运动详情</h1></div>
+        <div class="info-item"><h1>Exercise Details</h1></div>
         <div class="info-item" style="">
-          运动种类：{{ detailInfo.sportType }}
+          Exercise Type: {{ detailInfo.sportType }}
         </div>
-        <div class="info-item">适宜时间：{{ detailInfo.suitableTime }}</div>
+        <div class="info-item">Suitable Time: {{ detailInfo.suitableTime }}</div>
         <div class="info-item">
-          运动心率：{{ detailInfo.suitableHeartRate }}
+          Target Heart Rate: {{ detailInfo.suitableHeartRate }}
         </div>
         <div class="info-item">
-          适宜频率：{{ detailInfo.suitableFrequency }}
+          Suitable Frequency: {{ detailInfo.suitableFrequency }}
         </div>
-        <div class="info-item">推荐速度：{{ detailInfo.recommendedSpeed }}</div>
+        <div class="info-item">Recommended Speed: {{ detailInfo.recommendedSpeed }}</div>
       </div>
     </div>
     <div class="box2">
       <div class="button1">
         <button class="buttonDetail" @click="showBox('forbiddenDiseases')">
-          禁忌疾病
+          Contraindicated Conditions
         </button>
         <button class="buttonDetail" @click="showBox('methodIntroduction')">
-          方法介绍
+          Method Introduction
         </button>
         <button class="buttonDetail" @click="showBox('attentionItems')">
-          注意事项
+          Precautions
         </button>
       </div>
     </div>
     <div class="box3">
       <div class="card" v-if="showForbiddenDiseases">
-        <div class="card-header">{{ detailInfo.sportType }}禁忌疾病</div>
+        <div class="card-header">{{ detailInfo.sportType }} Contraindicated Conditions</div>
         <div class="card-body">{{ detailInfo.disease }}</div>
       </div>
 
       <div class="card" v-if="showMethodIntroduction">
-        <div class="card-header">{{ detailInfo.sportType }}方法介绍</div>
+        <div class="card-header">{{ detailInfo.sportType }} Method Introduction</div>
         <div class="card-body">{{ detailInfo.method }}</div>
       </div>
 
       <div class="card" v-if="showAttentionItems">
-        <div class="card-header">{{ detailInfo.sportType }}注意事项</div>
+        <div class="card-header">{{ detailInfo.sportType }} Precautions</div>
         <div class="card-body">{{ detailInfo.notes }}</div>
       </div>
     </div>
@@ -146,16 +146,16 @@ export default {
   height: 100%;
   width: 100%;
   background-color: rgb(240, 239, 239);
-  overflow: auto; /* 添加滚动条 */
+  overflow: auto; /* Add scrollbar */
 }
 
 .top_area {
   height: 60px;
   background-color: #a17693;
   display: flex;
-  justify-content: space-between; /* 左右对齐 */
-  align-items: center; /* 垂直居中 */
-  padding: 0 20px; /* 添加左右内边距 */
+  justify-content: space-between; /* Align left and right */
+  align-items: center; /* Vertically center */
+  padding: 0 20px; /* Add left and right padding */
 }
 
 .section {
@@ -179,7 +179,7 @@ export default {
   flex-direction: row;
 }
 
-/* 设置 info 的宽度为 100%，并让它内部的子元素垂直排列 */
+/* Set info width to 100% and align children vertically */
 .info1 {
   width: 50%;
   display: flex;
@@ -190,14 +190,14 @@ export default {
   margin-right: 10%;
 }
 
-/* 为每个 info-item 添加虚线分割线 */
+/* Add dashed divider for each info-item */
 .info-item {
   display: block;
   margin-bottom: 10px;
   border-bottom: 1px dashed #ccc;
   width: 50%;
   text-align: center;
-  line-height: 60px; /* 设置行间距为 20px */
+  line-height: 60px; /* Set line height */
 }
 
 .buttonDetail {
@@ -241,7 +241,7 @@ button:hover {
 .top_area {
   height: 50px;
   background-color: rgb(187, 176, 235);
-  box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.3); /* 添加阴影 */
+  box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.3); /* Add shadow */
 }
 
 .card {

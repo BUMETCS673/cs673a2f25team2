@@ -4,9 +4,9 @@
       <el-col :span="6">
         <div class="grid-content bg-purple-dark">
           <div class="col1">
-            <div class="col6">身高</div>
+            <div class="col6">Height</div>
             <div class="col6zhi">
-              {{ this.bodyInfo.height }}<span class="unit">/m</span>
+              {{ this.bodyInfo.height }}<span class="unit">m</span>
             </div>
           </div>
           <div>
@@ -17,9 +17,9 @@
       <el-col :span="6">
         <div class="grid-content bg-purple-dark">
           <div class="col1">
-            <div class="col6">体重</div>
+            <div class="col6">Weight</div>
             <div class="col6zhi">
-              {{ this.bodyInfo.weight }}<span class="unit">/kg</span>
+              {{ this.bodyInfo.weight }}<span class="unit">kg</span>
             </div>
           </div>
           <div>
@@ -41,7 +41,7 @@
       <el-col :span="6">
         <div class="grid-content bg-purple-dark">
           <div class="col1">
-            <div class="col6">年龄</div>
+            <div class="col6">Age</div>
             <div class="col6zhi" style="text-align: center; font-size: 30px">
               {{ this.bodyInfo.age }}<span class="unit"></span>
             </div>
@@ -96,7 +96,7 @@ export default {
   methods: {
     async getBodyInfo() {
       try {
-        // 使用解构赋值从 userApi.getBodyInfo() 返回的 Promise 对象中提取 data.bodyList 数组的第一个元素（即 bodyInfo 对象）
+        // Use destructuring to extract the first bodyInfo object from data.bodyList returned by userApi.getBodyInfo()
         const {
           data: {
             bodyList: [bodyInfo],
@@ -104,7 +104,7 @@ export default {
         } = await userApi.getBodyInfo();
         this.bodyInfo = bodyInfo;
       } catch (error) {
-        console.log("获取身体信息错误");
+        console.log("Failed to fetch body information");
       }
     },
 
@@ -114,10 +114,10 @@ export default {
 
         const response = await FunctionApi.getBodyNotes(this.bodyInfo.id);
 
-        // 从返回结果中获取 BodyNotesInfo，并赋值给组件的 BodyNotesInfo 属性
+        // Retrieve BodyNotesInfo from the response and assign it to the component property
         this.BodyNotesInfo = response.data;
 
-        // 遍历 BodyNotesInfo 数组中的每一个元素，将其各个属性值分别添加到对应的数组中,note包含每一条数据的对象
+        // Iterate through BodyNotesInfo and push each field into the corresponding arrays; note is each data object
         this.BodyNotesInfo.forEach((note) => {
           this.vision.push(note.vision);
           this.waterConsumption.push(note.waterConsumption);
@@ -132,16 +132,16 @@ export default {
           this.date.push(formattedDate);
         });
       } catch (error) {
-        console.log("获取身体信息错误");
+        console.log("Failed to fetch body notes");
       }
     },
 
     bmiM() {
-      // 从bodyInfo中获取身高和体重的值，并转换为 Number 类型
+      // Get height and weight from bodyInfo and convert to Number
       const weight = Number(this.bodyInfo.weight);
-      // 计算BMI值
+      // Calculate BMI
       const bmiValue = weight / (this.bodyInfo.height * this.bodyInfo.height);
-      // 返回计算结果并保留两位小数
+      // Return result with two decimal places
       this.bmi = bmiValue.toFixed(2);
       return bmiValue.toFixed(2);
     },
@@ -165,7 +165,7 @@ export default {
           containLabel: true,
         },
         title: {
-          text: "视力变化趋势图",
+          text: "Vision Trend",
           textStyle: {
             fontWeight: "normal",
             fontSize: 25,
@@ -183,10 +183,10 @@ export default {
               alignWithLabel: true,
             },
             axisLabel: {
-              interval: 1, //设置X轴文字显示间隔
-              rotate: 45, //设置X轴文字旋转角度
+              interval: 1, // Set X-axis label interval
+              rotate: 45, // Rotate X-axis labels
               textStyle: {
-                fontSize: 12, //设置X轴文字样式
+                fontSize: 12, // X-axis label style
               },
             },
           },
@@ -196,27 +196,27 @@ export default {
             type: "value",
             axisLabel: {
               textStyle: {
-                fontSize: 12, //设置Y轴文字样式
+                fontSize: 12, // Y-axis label style
               },
             },
           },
         ],
         series: [
           {
-            name: "视力",
+            name: "Vision",
             type: "bar",
             barWidth: "60%",
             data: this.vision,
             itemStyle: {
-              // 阴影的大小
+              // Shadow blur
               shadowBlur: 5,
-              // 阴影水平方向上的偏移
+              // Shadow offset X
               shadowOffsetX: 2,
-              // 阴影垂直方向上的偏移
+              // Shadow offset Y
               shadowOffsetY: 2,
-              // 阴影颜色
+              // Shadow color
               shadowColor: "rgba(0, 0, 0, 0.5)",
-              // 柱状图圆角，初始化效果
+              // Bar corner radius
               barBorderRadius: 5,
             },
           },
@@ -231,7 +231,7 @@ export default {
 
       const option = {
         title: {
-          text: "血压血糖变化趋势图",
+          text: "Blood Pressure & Blood Sugar Trends",
           textStyle: {
             fontWeight: "normal",
             fontSize: 25,
@@ -245,15 +245,15 @@ export default {
           trigger: "axis",
         },
         legend: {
-          data: ["血压", "血糖"],
+          data: ["Blood Pressure", "Blood Sugar"],
         },
         xAxis: {
           type: "category",
           data: this.date,
           axisLabel: {
-            interval: 1, //设置X轴文字显示间隔
+            interval: 1, // Set X-axis label interval
             textStyle: {
-              fontSize: 12, //设置X轴文字样式
+              fontSize: 12, // X-axis label style
             },
           },
         },
@@ -262,12 +262,12 @@ export default {
         },
         series: [
           {
-            name: "血压",
+            name: "Blood Pressure",
             data: this.bloodPressure,
             type: "line",
           },
           {
-            name: "血糖",
+            name: "Blood Sugar",
             data: this.bloodSugar,
             type: "line",
           },
@@ -291,7 +291,7 @@ export default {
 
         const option = {
           title: {
-            text: "心率变化趋势图",
+            text: "Heart Rate Trend",
             textStyle: {
               fontWeight: "normal",
               fontSize: 25,
@@ -329,7 +329,7 @@ export default {
           tooltip: {
             trigger: "axis",
             formatter: function (params) {
-              return params[0].name + "：" + params[0].value;
+              return params[0].name + ": " + params[0].value;
             },
           },
           series: [
@@ -352,12 +352,12 @@ export default {
                 data: [
                   {
                     type: "average",
-                    name: "平均值",
+                    name: "Average",
                   },
                 ],
                 label: {
                   position: "insideEndBottom",
-                  formatter: "{b}：{c}",
+                  formatter: "{b}: {c}",
                 },
                 lineStyle: {
                   type: "dashed",
@@ -404,7 +404,7 @@ export default {
   justify-content: center;
   align-items: center;
   margin-top: 30px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); /* 添加四边阴影 */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); /* Add box shadow on all sides */
 }
 
 .row-bg {
@@ -418,7 +418,7 @@ export default {
   background-color: #555;
   display: flex;
   flex-direction: row;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); /* 添加四边阴影 */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); /* Add box shadow on all sides */
 }
 
 .box {
