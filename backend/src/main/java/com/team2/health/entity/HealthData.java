@@ -17,7 +17,7 @@ public class HealthData {
     @Column(nullable = false, length = 50)
     private String dataType;
 
-    @Column(nullable = false)
+    @Column(name = "measure_value", nullable = false)
     private Double value;
 
     @Column(nullable = false, length = 20)
@@ -51,4 +51,3 @@ public class HealthData {
     public String getNotes() { return notes; }
     public void setNotes(String notes) { this.notes = notes; }
 }
-

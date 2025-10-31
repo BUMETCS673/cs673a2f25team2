@@ -36,5 +36,9 @@ public class HealthDataService {
     public List<HealthData> listByUser(Long userId) {
         return healthDataRepository.findByUser_Id(userId);
     }
-}
 
+    // List all records
+    public List<HealthData> listAll() {
+        return healthDataRepository.findAll();
+    }
+}
