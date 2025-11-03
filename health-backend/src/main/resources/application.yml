@@ -1,0 +1,44 @@
+spring:
+  ai:
+    openai:
+      # 这里使用的是阿里的千问模型，如果有需要修改为其他模型，请自行调整配置
+      base-url: https://dashscope.aliyuncs.com/compatible-mode
+      # 填写阿里百炼大模型平台申请的key（https://bailian.console.aliyun.com/?tab=model#/model-market）
+      api-key: xxx
+      # 这个配置的是"对话模型"
+      chat:
+        options:
+          # 模型名称（这里用的是千问-Plus, 可以替换成自己想使用的）
+          model: qwen-plus
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/db_health?useUnicode=true&characterEncoding=UTF-8&useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: Qwer941212*
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    jpa:
+      hibernate:
+        ddl-auto: update
+      show-sql: true
+
+  # redis:
+  #   port:6379
+  #   host:localhost
+
+
+#debug报告
+logging:
+  level:
+    com.shanzhu: debug
+
+#逻辑删除
+mybatis-plus:
+  global-config:
+    db-config:
+      logic-delete-field: deleted # 全局逻辑删除的实体字段名(since 3.3.0,配置后可以忽略不配置步骤2)
+      logic-delete-value: 1 # 逻辑已删除值(默认为 1)
+      logic-not-delete-value: 0 # 逻辑未删除值(默认为 0)
+  type-aliases-package: com.shanzhu.*.entity
+
+
+
