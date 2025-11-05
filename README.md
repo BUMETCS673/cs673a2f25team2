@@ -128,6 +128,7 @@ The system uses a comprehensive database schema with the following main entities
    - SQLite database will be automatically created at `${user.home}/CS673/db_health`
    - if not please create it manually
    - Schema initialization runs automatically on startup
+   - Also remeber to change the database password in `src/main/resources/application.yml`
 
 3. **Run the Spring Boot application**
    ```bash
