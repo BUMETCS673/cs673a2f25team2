@@ -155,21 +155,84 @@ onMounted(() => {
 
 <style scoped>
 .profile {
-  padding: 20px;
+  padding: 0;
 }
 
 .user-info {
   text-align: center;
-  padding: 20px 0;
+  padding: 30px 0;
+}
+
+.user-info :deep(.el-avatar) {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  border: 4px solid #fff;
+  transition: all 0.3s ease;
+}
+
+.user-info :deep(.el-avatar):hover {
+  transform: scale(1.05);
+  box-shadow: 0 12px 32px rgba(102, 126, 234, 0.3);
 }
 
 .user-info h3 {
-  margin: 10px 0;
+  margin: 20px 0 10px;
   color: #303133;
+  font-size: 24px;
+  font-weight: 600;
 }
 
 .user-info p {
-  margin: 5px 0;
+  margin: 8px 0;
+  color: #909399;
+  font-size: 14px;
+}
+
+:deep(.el-card__header) {
+  background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+  border-bottom: 2px solid #e4e7ed;
+  font-weight: 600;
+  font-size: 16px;
+  padding: 18px 20px;
+}
+
+:deep(.el-card__body) {
+  padding: 30px;
+}
+
+:deep(.el-form-item__label) {
+  font-weight: 600;
+  color: #606266;
+}
+
+:deep(.el-input__wrapper) {
+  border-radius: 6px;
+}
+
+:deep(.el-button) {
+  border-radius: 6px;
+  font-weight: 500;
+  padding: 10px 25px;
+}
+
+:deep(.el-descriptions) {
+  margin-top: 10px;
+}
+
+:deep(.el-descriptions__label) {
+  font-weight: 600;
+  color: #606266;
+}
+
+:deep(.el-descriptions__content) {
+  color: #303133;
+}
+
+:deep(.el-tag) {
+  border-radius: 4px;
+  font-weight: 500;
+  padding: 0 12px;
+  height: 26px;
+  line-height: 26px;
 }
 </style>
 
