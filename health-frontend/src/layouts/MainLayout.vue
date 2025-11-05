@@ -28,6 +28,10 @@
           <el-icon><Basketball /></el-icon>
           <span>Sports Knowledge</span>
         </el-menu-item>
+        <el-menu-item index="/ai-chat">
+          <el-icon><ChatDotRound /></el-icon>
+          <span>AI Chat</span>
+        </el-menu-item>
         <el-menu-item index="/user-management">
           <el-icon><Avatar /></el-icon>
           <span>User Management</span>

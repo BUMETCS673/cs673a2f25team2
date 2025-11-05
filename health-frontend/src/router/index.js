@@ -44,6 +44,12 @@ const routes = [
         meta: { title: 'Sports Knowledge', icon: 'Basketball' }
       },
       {
+        path: 'ai-chat',
+        name: 'AiChat',
+        component: () => import('../views/AiChat.vue'),
+        meta: { title: 'AI Chat', icon: 'ChatDotRound' }
+      },
+      {
         path: 'user-management',
         name: 'UserManagement',
         component: () => import('../views/UserManagement.vue'),

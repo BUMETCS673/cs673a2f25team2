@@ -82,6 +82,9 @@
             <el-button type="success" @click="$router.push('/sport-info')">
               View Sports Knowledge
             </el-button>
+            <el-button type="warning" @click="$router.push('/ai-chat')">
+              AI Health Assistant
+            </el-button>
             <el-button type="info" @click="$router.push('/profile')">
               Personal Center
             </el-button>
