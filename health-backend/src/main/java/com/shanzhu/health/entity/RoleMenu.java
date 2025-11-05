@@ -9,14 +9,6 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
-/**
- * <p>
- *
- * </p>
- *
- * @author shanzhu
- * @since 2025-07-01
- */
 @Data
 @TableName("j_role_menu")
 @NoArgsConstructor

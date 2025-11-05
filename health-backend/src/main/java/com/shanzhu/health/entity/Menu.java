@@ -12,14 +12,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * <p>
- *
- * </p>
- *
- * @author shanzhu
- * @since 2025-07-01
- */
 @Data
 @TableName("j_menu")
 public class Menu implements Serializable {

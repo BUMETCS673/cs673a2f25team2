@@ -13,14 +13,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * <p>
- * 前端控制器
- * </p>
- *
- * @author shanzhu
- * @since 2025-07-01
- */
 
 @RestController
 @RequestMapping("/role")
@@ -78,7 +70,7 @@ public class RoleController {
     public Unification<Role> deleteRoleById(@PathVariable("id") Integer id) {
         //根据id删除角色
         roleService.deleteRoleById(id);
-        return Unification.success("删除成功");
+        return Unification.success("Delete successful");
     }
 
     @GetMapping("/all")

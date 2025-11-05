@@ -1,9 +1,3 @@
-/**
- * @projectName springAi
- * @package com.example.springai.config
- * @className com.example.springai.websocket.WebSocketConfig
- * @copyright Copyright 2024 Thunisoft, Inc All rights reserved.
- */
 package com.shanzhu.health.websocket;
 
 

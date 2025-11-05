@@ -6,14 +6,6 @@ import com.shanzhu.health.mapper.RoleMenuMapper;
 import com.shanzhu.health.service.IRoleMenuService;
 import org.springframework.stereotype.Service;
 
-/**
- * <p>
- * 服务实现类
- * </p>
- *
- * @author shanzhu
- * @since 2025-07-01
- */
 @Service
 public class RoleMenuServiceImpl extends ServiceImpl<RoleMenuMapper, RoleMenu> implements IRoleMenuService {
 }

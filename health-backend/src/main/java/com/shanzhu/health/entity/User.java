@@ -11,14 +11,6 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 import java.util.List;
 
-/**
- * <p>
- *
- * </p>
- *
- * @author shanzhu
- * @since 2025-07-01
- */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

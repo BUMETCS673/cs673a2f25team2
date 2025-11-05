@@ -5,14 +5,6 @@ import com.shanzhu.health.entity.Menu;
 
 import java.util.List;
 
-/**
- * <p>
- * 服务类
- * </p>
- *
- * @author shanzhu
- * @since 2025-07-01
- */
 public interface IMenuService extends IService<Menu> {
 
     List<Menu> getAllMenu();

@@ -69,7 +69,7 @@ public class DetailController {
     @PutMapping("/updateDetail")
     public Unification<?> updateDetail(@RequestBody Detail detail) {
         detailService.updateDetail(detail);
-        return Unification.success("修改成功");
+        return Unification.success("Modify successful");
     }
 
 
@@ -85,7 +85,7 @@ public class DetailController {
     @DeleteMapping("/deleteDetailById/{id}")
     public Unification<Detail> deleteDetailById(@PathVariable("id") Integer id) {
         detailService.deletDetailById(id);
-        return Unification.success("删除成功");
+        return Unification.success("Deleted");
     }
 
 

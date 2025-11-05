@@ -5,14 +5,6 @@ import com.shanzhu.health.entity.User;
 
 import java.util.Map;
 
-/**
- * <p>
- * 服务类
- * </p>
- *
- * @author shanzhu
- * @since 2025-07-01
- */
 public interface IUserService extends IService<User> {
 
     Map<String, Object> login(User user);

@@ -6,14 +6,6 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
-/**
- * <p>
- * Mapper 接口
- * </p>
- *
- * @author shanzhu
- * @since 2025-07-01
- */
 public interface MenuMapper extends BaseMapper<Menu> {
     /**
      * @Param注解用于给参数取别名，使SQL语句中的占位符可以正确映射到方法参数； getMenuListByUserId是方法名，根据Java命名规范，应该以动词开头，表示该方法的功能；

@@ -6,14 +6,6 @@ import com.shanzhu.health.mapper.UserRoleMapper;
 import com.shanzhu.health.service.IUserRoleService;
 import org.springframework.stereotype.Service;
 
-/**
- * <p>
- * 服务实现类
- * </p>
- *
- * @author shanzhu
- * @since 2025-07-01
- */
 @Service
 public class UserRoleServiceImpl extends ServiceImpl<UserRoleMapper, UserRole> implements IUserRoleService {
 

@@ -13,6 +13,6 @@ public class BackendApplication {
 
         SpringApplication.run(BackendApplication.class, args);
 
-        System.out.println("=====================项目后端启动成功============================");
+        System.out.println("=====================running successfully============================");
     }
 }

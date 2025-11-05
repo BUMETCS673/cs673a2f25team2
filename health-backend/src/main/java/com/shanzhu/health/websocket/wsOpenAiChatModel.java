@@ -1,9 +1,3 @@
-/**
- * @projectName springAi
- * @package com.example.springai.websocket
- * @className com.example.springai.websocket.OpenAiChatModel
- * @copyright Copyright 2024 Thunisoft, Inc All rights reserved.
- */
 package com.shanzhu.health.websocket;
 
 import org.springframework.ai.openai.OpenAiChatModel;

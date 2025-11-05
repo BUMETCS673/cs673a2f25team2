@@ -5,14 +5,7 @@ import com.shanzhu.health.entity.User;
 
 import java.util.List;
 
-/**
- * <p>
- * Mapper 接口
- * </p>
- *
- * @author shanzhu
- * @since 2025-07-01
- */
+
 public interface UserMapper extends BaseMapper<User> {
     //这个方法是用来根据用户ID查询其拥有的角色名称列表的
     public List<String> getRoleNameByUserId(Integer userId);

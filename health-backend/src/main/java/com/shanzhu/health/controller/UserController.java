@@ -19,14 +19,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * <p>
- * 前端控制器
- * </p>
- *
- * @author shanzhu
- * @since 2025-07-01
- */
 @RestController
 @RequestMapping("/user")
 public class UserController {

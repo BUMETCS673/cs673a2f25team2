@@ -67,7 +67,7 @@ public class SportInfoController {
     @PutMapping("/update")
     public Unification<?> updateSport(@RequestBody SportInfo sport) {
         sportInfoService.updateSport(sport);
-        return Unification.success("修改成功");
+        return Unification.success("Modify successful");
     }
 
 
@@ -83,7 +83,7 @@ public class SportInfoController {
     @DeleteMapping("/{id}")
     public Unification<SportInfo> deletSportById(@PathVariable("id") Integer id) {
         sportInfoService.deletUserById(id);
-        return Unification.success("删除成功");
+        return Unification.success("Delete successful");
     }
 
 
