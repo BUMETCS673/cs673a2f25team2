@@ -125,7 +125,8 @@ The system uses a comprehensive database schema with the following main entities
    ```
 
 2. **Configure database**
-   - SQLite database will be automatically created at `${user.home}/CS673/health/health.db`
+   - SQLite database will be automatically created at `${user.home}/CS673/db_health`
+   - if not please create it manually
    - Schema initialization runs automatically on startup
 
 3. **Run the Spring Boot application**
@@ -139,7 +140,7 @@ The system uses a comprehensive database schema with the following main entities
 
 1. **Navigate to frontend directory**
    ```bash
-   cd frontend
+   cd health-frontend
    ```
 
 2. **Install dependencies**
@@ -152,11 +153,11 @@ The system uses a comprehensive database schema with the following main entities
    npm run dev
    ```
    
-   The frontend will be available at `http://localhost:8080`
+   The frontend will be available at `http://localhost:3000`
 
 ### Development Environment
 
-- **Frontend Dev Server**: `http://localhost:8080`
+- **Frontend Dev Server**: `http://localhost:3000`
 - **Backend API**: `http://localhost:8000`
 - **Database**: SQLite file-based storage
 
