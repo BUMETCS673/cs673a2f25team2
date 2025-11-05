@@ -259,13 +259,97 @@ onMounted(() => {
 
 <style scoped>
 .user-management {
-  padding: 20px;
+  padding: 0;
 }
 
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  font-weight: 600;
+  font-size: 18px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+:deep(.el-card__header) {
+  background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+  border-bottom: 2px solid #e4e7ed;
+  padding: 20px 25px;
+}
+
+:deep(.el-card__body) {
+  padding: 25px;
+}
+
+:deep(.el-input__wrapper) {
+  border-radius: 6px;
+}
+
+:deep(.el-table) {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+:deep(.el-table th) {
+  background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+  font-weight: 600;
+  color: #606266;
+}
+
+:deep(.el-table tr:hover) {
+  background-color: #f5f7fa;
+}
+
+:deep(.el-button--small) {
+  border-radius: 4px;
+  font-weight: 500;
+  padding: 7px 15px;
+}
+
+:deep(.el-tag) {
+  border-radius: 4px;
+  font-weight: 500;
+  padding: 0 12px;
+  height: 26px;
+  line-height: 26px;
+}
+
+:deep(.el-avatar) {
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+:deep(.el-dialog) {
+  border-radius: 12px;
+}
+
+:deep(.el-dialog__header) {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  padding: 20px 25px;
+  margin: 0;
+  border-radius: 12px 12px 0 0;
+}
+
+:deep(.el-dialog__title) {
+  color: #fff;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+:deep(.el-dialog__headerbtn .el-dialog__close) {
+  color: #fff;
+  font-size: 20px;
+}
+
+:deep(.el-dialog__body) {
+  padding: 30px;
+}
+
+:deep(.el-form-item__label) {
+  font-weight: 600;
+  color: #606266;
 }
 </style>
 

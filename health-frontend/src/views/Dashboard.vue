@@ -126,28 +126,43 @@ onMounted(() => {
 
 <style scoped>
 .dashboard {
-  padding: 20px;
+  padding: 0;
 }
 
 .stat-card {
   margin-bottom: 20px;
+  transition: all 0.3s ease;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
 .stat-item {
   display: flex;
   align-items: center;
+  padding: 10px 0;
 }
 
 .stat-icon {
-  width: 60px;
-  height: 60px;
-  border-radius: 8px;
+  width: 70px;
+  height: 70px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #fff;
-  font-size: 24px;
-  margin-right: 15px;
+  font-size: 28px;
+  margin-right: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover .stat-icon {
+  transform: scale(1.1) rotate(5deg);
 }
 
 .stat-content {
@@ -155,37 +170,67 @@ onMounted(() => {
 }
 
 .stat-value {
-  font-size: 28px;
-  font-weight: bold;
-  color: #303133;
-  margin-bottom: 5px;
+  font-size: 32px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 8px;
+  line-height: 1.2;
 }
 
 .stat-label {
   font-size: 14px;
   color: #909399;
+  font-weight: 500;
+  letter-spacing: 0.5px;
 }
 
 .welcome-content {
-  padding: 20px 0;
+  padding: 30px 0;
 }
 
 .welcome-content p {
-  margin-bottom: 15px;
+  margin-bottom: 20px;
   color: #606266;
-  line-height: 1.8;
+  line-height: 2;
+  font-size: 15px;
+}
+
+.welcome-content :deep(.el-button) {
+  margin-top: 10px;
+  padding: 12px 30px;
+  font-size: 15px;
+  font-weight: 600;
 }
 
 .quick-actions {
   display: flex;
   flex-direction: column;
   gap: 15px;
-  padding: 20px 0;
+  padding: 30px 0;
 }
 
-.quick-actions .el-button {
+.quick-actions :deep(.el-button) {
   width: 100% !important;
   margin: 0 !important;
+  height: 48px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 8px;
+}
+
+:deep(.el-card__header) {
+  background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+  border-bottom: 2px solid #e4e7ed;
+  font-weight: 600;
+  font-size: 16px;
+  padding: 18px 20px;
+}
+
+:deep(.el-card__body) {
+  padding: 25px;
 }
 </style>
 
