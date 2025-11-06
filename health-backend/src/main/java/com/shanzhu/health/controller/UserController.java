@@ -31,11 +31,6 @@ public class UserController {
     @Autowired
     private IBodyNotesService bodyNotesService;
 
-    /**
-     * 获取所有用户
-     *
-     * @return 返回用户列表
-     */
     @GetMapping("/all")
     public Unification<List<User>> getAllUser() {
         List<User> list = userService.list();

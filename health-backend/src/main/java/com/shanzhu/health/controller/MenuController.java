@@ -15,12 +15,6 @@ import java.util.List;
 public class MenuController {
     @Autowired
     private IMenuService menuService;
-
-    /**
-     * 查询所有菜单数据
-     *
-     * @return 返回Unification对象，包含查询到的所有菜单数据
-     */
     @GetMapping
     public Unification<List<Menu>> getAllMenu() {
         List<Menu> menuList = menuService.getAllMenu();
