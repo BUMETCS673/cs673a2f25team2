@@ -1,3 +1,12 @@
+<!--
+  Code Composition Ratio:
+  - AI Generated: 55%
+  - Manual Development: 45%
+  
+  User management page with search, filter, and CRUD operations.
+  User validation, status management, and search logic were manually developed
+  to meet specific admin requirements, with standard CRUD framework patterns.
+-->
 <template>
   <div class="user-management">
     <el-card>

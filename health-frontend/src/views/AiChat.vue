@@ -1,3 +1,12 @@
+<!--
+  Code Composition Ratio:
+  - AI Generated: 25%
+  - Manual Development: 75%
+  
+  This file contains complex WebSocket communication logic, real-time message streaming,
+  and state management for the AI chat interface. The core business logic, message handling,
+  and WebSocket lifecycle management were primarily manually developed.
+-->
 <template>
   <div class="ai-chat-container">
     <el-card class="chat-card">

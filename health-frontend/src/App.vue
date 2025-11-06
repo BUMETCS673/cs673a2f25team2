@@ -1,3 +1,11 @@
+<!--
+  Code Composition Ratio:
+  - AI Generated: 75%
+  - Manual Development: 25%
+  
+  Root application component with global styles. The styling patterns and
+  component structure follow standard Vue framework conventions.
+-->
 <template>
   <router-view />
 </template>

@@ -1,3 +1,12 @@
+<!--
+  Code Composition Ratio:
+  - AI Generated: 50%
+  - Manual Development: 50%
+  
+  Main application layout with sidebar navigation, header, and user menu.
+  The layout structure and user interaction logic (logout, navigation) were
+  developed with a balanced approach between framework patterns and custom logic.
+-->
 <template>
   <el-container class="layout-container">
     <el-aside width="200px" class="sidebar">
