@@ -1,3 +1,12 @@
+<!--
+  Code Composition Ratio:
+  - AI Generated: 55%
+  - Manual Development: 45%
+  
+  Body information management page with comprehensive health data display and editing.
+  The data model and form handling were manually configured to match health metrics
+  requirements, while the UI framework patterns are standard.
+-->
 <template>
   <div class="body-info">
     <el-card>

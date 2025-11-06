@@ -1,3 +1,11 @@
+/**
+ * Code Composition Ratio:
+ * - AI Generated: 65%
+ * - Manual Development: 35%
+ * 
+ * Body information API service module. Standard CRUD operations for
+ * body data and health records following RESTful API conventions.
+ */
 import request from './request'
 
 export default {

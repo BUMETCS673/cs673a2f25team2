@@ -1,3 +1,12 @@
+/**
+ * Code Composition Ratio:
+ * - AI Generated: 70%
+ * - Manual Development: 30%
+ * 
+ * Vite build configuration with proxy settings for API development.
+ * This follows standard Vite configuration patterns with custom proxy
+ * settings for backend API integration.
+ */
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 

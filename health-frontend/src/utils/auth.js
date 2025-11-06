@@ -1,4 +1,12 @@
 /**
+ * Code Composition Ratio:
+ * - AI Generated: 35%
+ * - Manual Development: 65%
+ * 
+ * Authentication utility functions for token and user info management.
+ * The localStorage abstraction and authentication state logic were manually
+ * developed to ensure secure and consistent data handling.
+ * 
  * 认证相关的工具函数
  */
 

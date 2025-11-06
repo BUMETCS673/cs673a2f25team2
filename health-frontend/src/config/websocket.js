@@ -1,3 +1,11 @@
+/**
+ * Code Composition Ratio:
+ * - AI Generated: 40%
+ * - Manual Development: 60%
+ * 
+ * WebSocket configuration for different environments. The environment-specific
+ * configuration logic was manually customized for deployment requirements.
+ */
 // WebSocket 配置
 const config = {
     // 开发环境

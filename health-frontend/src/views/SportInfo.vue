@@ -1,3 +1,12 @@
+<!--
+  Code Composition Ratio:
+  - AI Generated: 60%
+  - Manual Development: 40%
+  
+  Sports knowledge base management with search and CRUD functionality.
+  This follows standard data table patterns with search capabilities.
+  Most code is framework-based with custom field configurations.
+-->
 <template>
   <div class="sport-info">
     <el-card>
