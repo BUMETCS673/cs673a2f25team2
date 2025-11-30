@@ -19,14 +19,14 @@ public class WebSocketConfig implements WebSocketConfigurer {
 
     @Autowired
     public WebSocketConfig(wsOpenAiChatModel openAiChatModel, IBodyNotesService bodyNotesService) {
-        this.openAiChatModel = openAiChatModel; // 通过构造器注入
+        this.openAiChatModel = openAiChatModel; // Inject through constructor
         this.bodyNotesService = bodyNotesService;
     }
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry.addHandler(new ChatWebSocketHandler(openAiChatModel, bodyNotesService), "/ws/chat")
-                .setAllowedOrigins("*") // 允许所有源
+                .setAllowedOrigins("*") // Allow all origins
                 .addInterceptors(new HttpSessionHandshakeInterceptor());
     }
 }

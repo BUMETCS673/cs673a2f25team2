@@ -20,7 +20,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     private final wsOpenAiChatModel openAiChatModel;
     private final IBodyNotesService bodyNotesService;
 
-    // 构造方法注入 HistoryService 和 wsOpenAiChatModel
+    // Constructor injection of HistoryService and wsOpenAiChatModel
     public ChatWebSocketHandler(wsOpenAiChatModel openAiChatModel, IBodyNotesService bodyNotesService) {
         this.openAiChatModel = openAiChatModel;
         this.bodyNotesService = bodyNotesService;
@@ -29,8 +29,8 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     @Override
     public void handleTextMessage(WebSocketSession session, TextMessage message) throws IOException {
 
-        String payload = message.getPayload(); // 从客户端接收消息
-        ChatRequest request = parseMessage(payload); // 定义一个方法解析 JSON
+        String payload = message.getPayload(); // Receive message from client
+        ChatRequest request = parseMessage(payload); // Define a method to parse JSON
         String question = request.getText();
 
         String username = request.getUsername();
@@ -40,20 +40,20 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         }
 
 
-        // 初始化累积响应的 StringBuilder
+        // Initialize StringBuilder for accumulating responses
         StringBuilder responseBuilder = new StringBuilder();
 
-        // 使用 Flux<String> 流式返回数据给客户端
+        // Use Flux<String> to stream data back to client
         Flux<String> aiResponse = openAiChatModel.stream(question)
                 .doOnNext(chunk -> {
                     if (!"[DONE]".equalsIgnoreCase(chunk)) {
-                        responseBuilder.append(chunk); // 累加 AI 响应内容
+                        responseBuilder.append(chunk); // Accumulate AI response content
                     }
                 })
                 .map(chunk -> "data:" + chunk + "\n\n")
                 .concatWith(Mono.just("data:[DONE]\n\n"));
 
-        // 向客户端发送流式消息，同时监听完成事件
+        // Send streaming messages to client, while listening for completion events
         aiResponse.subscribe(response -> {
             try {
                 session.sendMessage(new TextMessage(response));
@@ -61,7 +61,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
                 e.printStackTrace();
             }
         }, error -> {
-            // 异常处理
+            // Exception handling
             error.printStackTrace();
         }, () -> {
 
@@ -70,8 +70,8 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 
 
     private ChatRequest parseMessage(String payload) {
-        // 假设 payload Yes JSON 格式，可以使用库解析
-        // 例如使用 Jackson ObjectMapper 解析为 ChatRequest 对象
+        // Assume payload is JSON format, can use library to parse
+        // For example, use Jackson ObjectMapper to parse into ChatRequest object
         ObjectMapper mapper = new ObjectMapper();
         try {
             return mapper.readValue(payload, ChatRequest.class);
@@ -80,8 +80,8 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         }
     }
 
-    // 以下YesPrompt构建方法
-    // 构造prompt的方法
+    // Prompt construction method below
+    // Method to construct prompt
     private String constructPrompt(List<BodyNotes> bodyNotes) {
         StringBuilder promptBuilder = new StringBuilder();
         promptBuilder.append("Based on the following user health data, provide health advice and output as a txt document:\n");
@@ -96,15 +96,15 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             promptBuilder.append("Blood Sugar:").append(note.getBloodSugar()).append("mmol/L\n");
             promptBuilder.append("Blood Pressure:").append(note.getBloodPressure()).append("mmHg\n");
             promptBuilder.append("Blood Lipid:").append(note.getBloodLipid()).append("mmol/L\n");
-            promptBuilder.append("Heart Rate:").append(note.getHeartRate()).append("次/分钟\n");
+            promptBuilder.append("Heart Rate:").append(note.getHeartRate()).append(" beats/minute\n");
             promptBuilder.append("Vision:").append(note.getVision()).append("\n");
-            promptBuilder.append("Sleep Duration:").append(note.getSleepDuration()).append("小时\n");
+            promptBuilder.append("Sleep Duration:").append(note.getSleepDuration()).append(" hours\n");
             promptBuilder.append("Sleep Quality:").append(note.getSleepQuality()).append("\n");
             promptBuilder.append("Smoking:").append(note.isSmoking() ? "Yes" : "No").append("\n");
             promptBuilder.append("Drinking:").append(note.isDrinking() ? "Yes" : "No").append("\n");
             promptBuilder.append("Exercise:").append(note.isExercise() ? "Yes" : "No").append("\n");
             promptBuilder.append("Food Preferences:").append(note.getFoodTypes()).append("\n");
-            promptBuilder.append("Water Intake:").append(note.getWaterConsumption()).append("ml/天\n");
+            promptBuilder.append("Water Intake:").append(note.getWaterConsumption()).append("ml/day\n");
             promptBuilder.append("Record Time:").append(note.getDate()).append("\n\n");
         }
 

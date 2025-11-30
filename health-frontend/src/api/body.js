@@ -1,7 +1,7 @@
 import request from './request'
 
 export default {
-  // 上传身体信息
+  // Upload body information
   uploadBodyInfo(data) {
     return request({
       url: '/user/BodyInformation',
@@ -10,7 +10,7 @@ export default {
     })
   },
   
-  // 获取身体信息
+  // Get body information
   getBodyInfo() {
     return request({
       url: '/user/getBodyInfo',
@@ -18,7 +18,7 @@ export default {
     })
   },
   
-  // 添加身体记录
+  // Add body record
   addBodyNotes(data) {
     return request({
       url: '/user/BodyInformationNotes',
@@ -27,7 +27,7 @@ export default {
     })
   },
   
-  // 获取身体记录列表
+  // Get body record list
   getBodyNotes(id) {
     return request({
       url: `/user/getBodyNotes/${id}`,
@@ -35,7 +35,7 @@ export default {
     })
   },
   
-  // 获取身体信息列表（分页）
+  // Get body information list (paginated)
   getBodyList(params) {
     return request({
       url: '/user/getBodyList',
@@ -44,7 +44,7 @@ export default {
     })
   },
   
-  // 根据ID获取身体信息
+  // Get body information by ID
   getBodyById(id) {
     return request({
       url: `/user/getBodyById/${id}`,
@@ -52,7 +52,7 @@ export default {
     })
   },
   
-  // 更新身体信息
+  // Update body information
   updateBody(data) {
     return request({
       url: '/user/updateBody',
@@ -61,7 +61,7 @@ export default {
     })
   },
   
-  // 删除身体信息
+  // Delete body information
   deleteBody(id) {
     return request({
       url: `/user/deleteBodyById/${id}`,
@@ -69,7 +69,7 @@ export default {
     })
   },
   
-  // 获取用户身体记录列表
+  // Get user body record list
   getUserBodyList(params) {
     return request({
       url: '/user/getUserBodyList',
@@ -78,7 +78,7 @@ export default {
     })
   },
   
-  // 根据ID获取用户身体记录
+  // Get user body record by ID
   getUserBodyById(notesid) {
     return request({
       url: `/user/getUserBodyById/${notesid}`,
@@ -86,7 +86,7 @@ export default {
     })
   },
   
-  // 更新用户身体记录
+  // Update user body record
   updateUserBody(data) {
     return request({
       url: '/user/updateUserBody',
@@ -95,7 +95,7 @@ export default {
     })
   },
   
-  // 删除用户身体记录
+  // Delete user body record
   deleteUserBody(notesid) {
     return request({
       url: `/user/deleteUserBodyById/${notesid}`,

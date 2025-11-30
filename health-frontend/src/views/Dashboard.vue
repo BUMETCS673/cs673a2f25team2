@@ -113,8 +113,8 @@ onMounted(() => {
     userInfo.value = JSON.parse(userInfoStr)
   }
   
-  // 这里可以加载统计数据
-  // 暂时使用模拟数据
+  // Statistics can be loaded here
+  // Temporarily using mock data
   stats.value = {
     totalUsers: 128,
     totalRecords: 256,

@@ -1,23 +1,23 @@
 /**
- * 认证相关的工具函数
+ * Authentication related utility functions
  */
 
 /**
- * 获取存储的token
+ * Get stored token
  */
 export function getToken() {
   return localStorage.getItem('token')
 }
 
 /**
- * 设置token
+ * Set token
  */
 export function setToken(token) {
   localStorage.setItem('token', token)
 }
 
 /**
- * 移除token
+ * Remove token
  */
 export function removeToken() {
   localStorage.removeItem('token')
@@ -25,7 +25,7 @@ export function removeToken() {
 }
 
 /**
- * 获取用户信息
+ * Get user information
  */
 export function getUserInfo() {
   const userInfoStr = localStorage.getItem('userInfo')
@@ -33,14 +33,14 @@ export function getUserInfo() {
 }
 
 /**
- * 设置用户信息
+ * Set user information
  */
 export function setUserInfo(userInfo) {
   localStorage.setItem('userInfo', JSON.stringify(userInfo))
 }
 
 /**
- * 检查是否已登录
+ * Check if logged in
  */
 export function isLoggedIn() {
   return !!getToken()

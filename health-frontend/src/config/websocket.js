@@ -1,17 +1,17 @@
-// WebSocket 配置
+// WebSocket configuration
 const config = {
-    // 开发环境
+    // Development environment
     development: {
         wsUrl: 'ws://localhost:8080/ws/chat'
     },
-    // 生产环境
+    // Production environment
     production: {
         wsUrl: 'ws://your-production-domain.com/ws/chat'
     }
 }
 
-// 获取当前环境
+// Get current environment
 const env = import.meta.env.MODE || 'development'
 
-// 导出当前环境的配置
+// Export configuration for current environment
 export default config[env] || config.development

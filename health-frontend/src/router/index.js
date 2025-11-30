@@ -84,7 +84,7 @@ const router = createRouter({
   routes
 })
 
-// 路由守卫
+// Route guard
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('token')
   if (to.meta.requiresAuth && !token) {

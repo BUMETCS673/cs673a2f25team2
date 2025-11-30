@@ -1,6 +1,6 @@
-# 健康管理系统 - 前端
+# Health Management System - Frontend
 
-## 技术栈
+## Tech Stack
 
 - Vue 3
 - Element Plus
@@ -8,35 +8,35 @@
 - Axios
 - Pinia
 
-## 安装依赖
+## Install Dependencies
 
 ```bash
 npm install
 ```
 
-## 启动开发服务器
+## Start Development Server
 
 ```bash
 npm run dev
 ```
 
-## 构建生产版本
+## Build for Production
 
 ```bash
 npm run build
 ```
 
-## 预览生产构建
+## Preview Production Build
 
 ```bash
 npm run preview
 ```
 
-## 后端接口地址
+## Backend API Address
 
-默认后端地址：http://localhost:8080
+Default backend address: http://localhost:8080
 
-如需修改，请在 `vite.config.js` 中修改代理配置。
+To modify, please update the proxy configuration in `vite.config.js`.
 
 
 

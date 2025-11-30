@@ -431,7 +431,7 @@ onUnmounted(() => {
   z-index: 10;
 }
 
-/* 打字指示器 */
+/* Typing indicator */
 .typing-indicator {
   display: flex;
   gap: 4px;
@@ -479,7 +479,7 @@ onUnmounted(() => {
   }
 }
 
-/* 滚动条样式 */
+/* Scrollbar styles */
 .message-list::-webkit-scrollbar {
   width: 6px;
 }

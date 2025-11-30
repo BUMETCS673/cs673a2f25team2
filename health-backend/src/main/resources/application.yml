@@ -1,14 +1,14 @@
 spring:
   ai:
     openai:
-      # 这里使用的是阿里的千问模型，如果有需要修改为其他模型，请自行调整配置
+      # Here we use Alibaba's Qwen model, if you need to modify to other models, please adjust the configuration yourself
       base-url: https://dashscope.aliyuncs.com/compatible-mode
-      # 填写阿里百炼大模型平台申请的key（https://bailian.console.aliyun.com/?tab=model#/model-market）
+      # Fill in the key applied from Alibaba Bailian large model platform (https://bailian.console.aliyun.com/?tab=model#/model-market)
       api-key: xxx
-      # 这个配置的是"对话模型"
+      # This configuration is for "chat model"
       chat:
         options:
-          # 模型名称（这里用的是千问-Plus, 可以替换成自己想使用的）
+          # Model name (here we use Qwen-Plus, can be replaced with what you want to use)
           model: qwen-plus
 
   datasource:
@@ -26,19 +26,33 @@ spring:
   #   host:localhost
 
 
-#debug报告
+# Debug report
 logging:
   level:
     com.shanzhu: debug
 
-#逻辑删除
+# Logical delete
 mybatis-plus:
   global-config:
     db-config:
-      logic-delete-field: deleted # 全局逻辑删除的实体字段名(since 3.3.0,配置后可以忽略不配置步骤2)
-      logic-delete-value: 1 # 逻辑已删除值(默认为 1)
-      logic-not-delete-value: 0 # 逻辑未删除值(默认为 0)
+      logic-delete-field: deleted # Global logical delete entity field name (since 3.3.0, can ignore step 2 after configuration)
+      logic-delete-value: 1 # Logical deleted value (default is 1)
+      logic-not-delete-value: 0 # Logical not deleted value (default is 0)
   type-aliases-package: com.shanzhu.*.entity
 
+# JWT configuration
+# Production environment recommends using environment variables: export JWT_SECRET=your-secret-key
+jwt:
+  secret: ${JWT_SECRET:y3aX2K8/4TdF6zBmQv7hPwScN9jLgRtA+UoWxEiYlDn5fMpGqHtJkKuV}
 
+# CORS configuration
+# Production environment recommends using environment variables: export CORS_ALLOWED_ORIGINS=http://yourdomain.com
+cors:
+  allowed-origins: http://localhost:5173,http://localhost:3000
+
+# Data encryption configuration
+# Production environment recommends using environment variables: export ENCRYPTION_KEY=your-16-byte-key
+# Note: Key must be 16 bytes (AES-128), will be automatically adjusted if length is incorrect
+encryption:
+  key: ${ENCRYPTION_KEY:HealthSystem2024Key}
 

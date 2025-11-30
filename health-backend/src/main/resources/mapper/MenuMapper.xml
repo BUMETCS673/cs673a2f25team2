@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.shanzhu.health.mapper.MenuMapper">
 
-    <!-- 定义一个 id 为 getMenuListByUserId 的查询语句，返回类型为 Menu 类型的 List -->
+    <!-- Define a query statement with id getMenuListByUserId, return type is List of Menu type -->
     <select id="getMenuListByUserId" resultType="Menu">
         SELECT a.*
         FROM j_menu a,

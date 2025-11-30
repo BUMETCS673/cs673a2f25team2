@@ -1,6 +1,6 @@
 <template>
   <div class="admin-dashboard">
-    <!-- 统计面板 -->
+    <!-- Statistics Panel -->
     <el-row :gutter="20" style="margin-bottom: 20px">
       <el-col :span="6">
         <el-card class="stat-card stat-card-primary">
@@ -101,7 +101,7 @@
         </div>
       </template>
 
-      <!-- 批量操作栏 -->
+      <!-- Batch Operations Bar -->
       <div v-if="selectedUsers.length > 0" class="batch-actions">
         <span class="batch-info">Selected: {{ selectedUsers.length }} users</span>
         <el-button size="small" type="success" @click="handleBatchEnable" :icon="CircleCheck">Enable</el-button>
@@ -174,7 +174,7 @@
       />
     </el-card>
 
-    <!-- 用户详情对话框 -->
+    <!-- User Details Dialog -->
     <el-dialog
       v-model="showDetailsDialog"
       title="User Details"
@@ -274,7 +274,7 @@
       </el-tabs>
     </el-dialog>
 
-    <!-- 健康数据管理对话框 -->
+    <!-- Health Data Management Dialog -->
     <el-dialog
       v-model="showHealthDialog"
       title="User Health Data Management"
@@ -336,7 +336,7 @@
       </el-tabs>
     </el-dialog>
 
-    <!-- 编辑健康记录对话框 -->
+    <!-- Edit Health Record Dialog -->
     <el-dialog
       v-model="showEditHealthRecordDialog"
       title="Edit Health Record"
@@ -361,8 +361,8 @@
         </el-form-item>
         <el-form-item label="Gender">
           <el-select v-model="healthRecordForm.gender" style="width: 100%">
-            <el-option label="Male" value="男" />
-            <el-option label="Female" value="女" />
+            <el-option label="Male" value="Male" />
+            <el-option label="Female" value="Female" />
           </el-select>
         </el-form-item>
         <el-form-item label="Height (cm)">
@@ -500,7 +500,7 @@ const pageNo = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
 
-// 统计数据
+// Statistics data
 const statistics = reactive({
   totalUsers: 0,
   activeUsers: 0,
@@ -508,10 +508,10 @@ const statistics = reactive({
   todayNewUsers: 0
 })
 
-// 批量操作
+// Batch operations
 const selectedUsers = ref([])
 
-// 用户详情对话框
+// User details dialog
 const showDetailsDialog = ref(false)
 const detailsTab = ref('basic')
 const userDetails = ref({})
@@ -521,18 +521,18 @@ const healthRecords = ref([])
 const healthRecordsLoading = ref(false)
 const currentViewingUserId = ref(null)
 
-// 健康数据对话框
+// Health data dialog
 const showHealthDialog = ref(false)
 const healthTab = ref('body')
 const healthBodyInfo = ref(null)
 const healthBodyInfoLoading = ref(false)
 
-// 编辑健康记录对话框
+// Edit health record dialog
 const showEditHealthRecordDialog = ref(false)
 const healthRecordForm = ref(null)
 const savingHealthRecord = ref(false)
 
-// 修改密码对话框
+// Change password dialog
 const showPasswordDialog = ref(false)
 const passwordFormRef = ref(null)
 const changingPassword = ref(false)
@@ -559,14 +559,14 @@ const form = reactive({
   roleIdList: [3]
 })
 
-// 过滤非管理员用户
+// Filter non-admin users
 const filteredTableData = computed(() => {
   let filtered = tableData.value.filter(user => {
     const roleIds = userRolesMap.value[user.id] || []
     return !roleIds.includes(1)
   })
 
-  // 应用搜索过滤
+  // Apply search filter
   if (searchForm.username) {
     filtered = filtered.filter(user => 
       user.username?.toLowerCase().includes(searchForm.username.toLowerCase())
@@ -634,7 +634,7 @@ const getRules = () => {
   return baseRules
 }
 
-// 计算统计数据
+// Calculate statistics
 const calculateStatistics = () => {
   const filtered = tableData.value.filter(user => {
     const roleIds = userRolesMap.value[user.id] || []
@@ -645,15 +645,15 @@ const calculateStatistics = () => {
   statistics.activeUsers = filtered.filter(u => u.status === 1).length
   statistics.inactiveUsers = filtered.filter(u => u.status === 0).length
   
-  // 计算今日新增用户（简化处理，实际应该根据创建时间）
+  // Calculate today's new users (simplified processing, should actually be based on creation time)
   const today = new Date().toDateString()
-  statistics.todayNewUsers = 0 // 由于没有创建时间字段，暂时设为0
+  statistics.todayNewUsers = 0 // Since there is no creation time field, temporarily set to 0
 }
 
 const loadData = async () => {
   loading.value = true
   try {
-    // 获取所有用户数据（使用较大的pageSize以确保获取所有数据用于统计）
+    // Get all user data (use larger pageSize to ensure all data is retrieved for statistics)
     const data = await userApi.getUserList({
       pageNo: 1,
       pageSize: 1000,
@@ -664,7 +664,7 @@ const loadData = async () => {
     tableData.value = data.rows || []
     total.value = data.total || 0
     
-    // 加载角色信息
+    // Load role information
     const rolePromises = tableData.value.map(async (user) => {
       try {
         const userData = await userApi.getUserById(user.id)
@@ -741,7 +741,7 @@ const handleDelete = async (row) => {
   })
 }
 
-// 修改密码
+// Change password
 const handleChangePassword = async (row) => {
   passwordForm.username = row.username
   passwordForm.newPassword = ''
@@ -864,7 +864,7 @@ const handleSubmit = async () => {
   })
 }
 
-// 批量操作
+// Batch operations
 const handleSelectionChange = (selection) => {
   selectedUsers.value = selection
 }
@@ -944,7 +944,7 @@ const handleBatchDelete = async () => {
   })
 }
 
-// 查看用户详情
+// View user details
 const handleViewDetails = async (row) => {
   currentViewingUserId.value = row.id
   showDetailsDialog.value = true
@@ -954,7 +954,7 @@ const handleViewDetails = async (row) => {
     const data = await userApi.getUserById(row.id)
     userDetails.value = data
     
-    // 加载身体信息
+    // Load body information
     bodyInfoLoading.value = true
     try {
       const bodyData = await bodyApi.getBodyById(row.id)
@@ -966,7 +966,7 @@ const handleViewDetails = async (row) => {
       bodyInfoLoading.value = false
     }
     
-    // 加载健康记录
+    // Load health records
     healthRecordsLoading.value = true
     try {
       const recordsData = await bodyApi.getBodyNotes(row.id)
@@ -989,13 +989,13 @@ const closeDetailsDialog = () => {
   currentViewingUserId.value = null
 }
 
-// 查看健康数据
+// View health data
 const handleViewHealth = async (row) => {
   currentViewingUserId.value = row.id
   showHealthDialog.value = true
   healthTab.value = 'body'
   
-  // 加载身体信息
+  // Load body information
   healthBodyInfoLoading.value = true
   try {
     const bodyData = await bodyApi.getBodyById(row.id)
@@ -1007,7 +1007,7 @@ const handleViewHealth = async (row) => {
     healthBodyInfoLoading.value = false
   }
   
-  // 加载健康记录
+  // Load health records
   healthRecordsLoading.value = true
   try {
     const recordsData = await bodyApi.getBodyNotes(row.id)
@@ -1026,7 +1026,7 @@ const closeHealthDialog = () => {
   currentViewingUserId.value = null
 }
 
-// 编辑健康记录
+// Edit health record
 const handleEditHealthRecord = (row) => {
   healthRecordForm.value = { ...row }
   showEditHealthRecordDialog.value = true
@@ -1041,7 +1041,7 @@ const handleSaveHealthRecord = async () => {
     ElMessage.success('Updated successfully')
     showEditHealthRecordDialog.value = false
     
-    // 刷新健康记录
+    // Refresh health records
     if (currentViewingUserId.value) {
       const recordsData = await bodyApi.getBodyNotes(currentViewingUserId.value)
       healthRecords.value = recordsData || []
@@ -1063,7 +1063,7 @@ const handleDeleteHealthRecord = async (row) => {
       await bodyApi.deleteUserBody(row.notes_id)
       ElMessage.success('Deleted successfully')
       
-      // 刷新健康记录
+      // Refresh health records
       if (currentViewingUserId.value) {
         const recordsData = await bodyApi.getBodyNotes(currentViewingUserId.value)
         healthRecords.value = recordsData || []
@@ -1078,7 +1078,7 @@ const closeEditHealthRecordDialog = () => {
   healthRecordForm.value = null
 }
 
-// 导出功能
+// Export functionality
 const handleExport = () => {
   const csvContent = convertToCSV(filteredTableData.value)
   downloadCSV(csvContent, `users_${new Date().toISOString().split('T')[0]}.csv`)
