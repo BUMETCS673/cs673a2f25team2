@@ -1,3 +1,12 @@
+<!--
+  Code Composition Ratio:
+  - AI Generated: 45%
+  - Manual Development: 55%
+  
+  User profile page with password change functionality. The password validation,
+  API integration, and user info management logic were manually developed with
+  attention to security and user experience.
+-->
 <template>
   <div class="profile">
     <el-row :gutter="20">

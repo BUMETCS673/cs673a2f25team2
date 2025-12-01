@@ -1,3 +1,12 @@
+/**
+ * Code Composition Ratio:
+ * - AI Generated: 45%
+ * - Manual Development: 55%
+ * 
+ * Vue Router configuration with route guards and navigation management.
+ * The route structure and authentication guard logic were manually configured
+ * based on application requirements and security policies.
+ */
 import { createRouter, createWebHistory } from 'vue-router'
 
 const routes = [

@@ -1,3 +1,11 @@
+/**
+ * Code Composition Ratio:
+ * - AI Generated: 70%
+ * - Manual Development: 30%
+ * 
+ * Sports information API service module. Simple CRUD operations following
+ * standard RESTful patterns with minimal custom logic.
+ */
 import request from './request'
 
 export default {

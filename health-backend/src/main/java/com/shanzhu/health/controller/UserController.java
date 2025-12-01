@@ -32,11 +32,7 @@ public class UserController {
     @Autowired
     private IBodyNotesService bodyNotesService;
 
-    /**
-     * Get all users
-     *
-     * @return Returns user list
-     */
+
     @GetMapping("/all")
     public Unification<List<User>> getAllUser() {
         List<User> list = userService.list();

@@ -1,4 +1,4 @@
-// WebSocket configuration
+
 const config = {
     // Development environment
     development: {

@@ -1,3 +1,11 @@
+<!--
+  Code Composition Ratio:
+  - AI Generated: 40%
+  - Manual Development: 60%
+  
+  Login page with form validation and authentication logic. The form validation rules,
+  API integration, and error handling were manually developed to meet security requirements.
+-->
 <template>
   <div class="login-container">
     <el-card class="login-card">

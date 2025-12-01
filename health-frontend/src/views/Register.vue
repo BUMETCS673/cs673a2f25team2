@@ -1,3 +1,12 @@
+<!--
+  Code Composition Ratio:
+  - AI Generated: 40%
+  - Manual Development: 60%
+  
+  User registration page with custom validation logic for email and phone.
+  The validation rules and form handling logic were manually developed to ensure
+  data quality and user experience.
+-->
 <template>
   <div class="register-container">
     <el-card class="register-card">

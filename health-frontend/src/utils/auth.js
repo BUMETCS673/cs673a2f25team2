@@ -1,5 +1,5 @@
 /**
- * Authentication related utility functions
+
  */
 
 /**
@@ -29,7 +29,15 @@ export function removeToken() {
  */
 export function getUserInfo() {
   const userInfoStr = localStorage.getItem('userInfo')
-  return userInfoStr ? JSON.parse(userInfoStr) : null
+  if (!userInfoStr) return null
+  
+  try {
+    return JSON.parse(userInfoStr)
+  } catch (error) {
+    // Handle invalid JSON gracefully
+    console.warn('Invalid userInfo JSON in localStorage:', error)
+    return null
+  }
 }
 
 /**

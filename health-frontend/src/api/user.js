@@ -1,3 +1,11 @@
+/**
+ * Code Composition Ratio:
+ * - AI Generated: 65%
+ * - Manual Development: 35%
+ * 
+ * User API service module. This file contains standard CRUD operations
+ * following RESTful conventions. Most endpoints follow common API patterns.
+ */
 import request from './request'
 
 export default {

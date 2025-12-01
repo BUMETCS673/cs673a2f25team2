@@ -1,3 +1,12 @@
+/**
+ * Code Composition Ratio:
+ * - AI Generated: 30%
+ * - Manual Development: 70%
+ * 
+ * This file implements HTTP request/response interceptors with authentication logic,
+ * error handling, and token management. The interceptor logic and error handling
+ * workflows were primarily manually developed to meet specific business requirements.
+ */
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
 import router from '../router'

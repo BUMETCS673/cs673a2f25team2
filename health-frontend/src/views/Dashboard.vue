@@ -1,3 +1,12 @@
+<!--
+  Code Composition Ratio:
+  - AI Generated: 60%
+  - Manual Development: 40%
+  
+  Dashboard page displaying system statistics and quick actions.
+  This is primarily a presentational component with mock data and
+  standard layout patterns.
+-->
 <template>
   <div class="dashboard">
     <el-row :gutter="20">

@@ -1,3 +1,12 @@
+<!--
+  Code Composition Ratio:
+  - AI Generated: 50%
+  - Manual Development: 50%
+  
+  Health records management page with CRUD operations and pagination.
+  The date formatting, validation logic, and data processing were manually
+  developed to handle health record specifics, balanced with standard CRUD patterns.
+-->
 <template>
   <div class="body-notes">
     <el-card>
