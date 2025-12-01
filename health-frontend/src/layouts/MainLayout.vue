@@ -41,7 +41,7 @@
           <el-icon><ChatDotRound /></el-icon>
           <span>AI Chat</span>
         </el-menu-item>
-        <el-menu-item index="/user-management">
+        <el-menu-item v-if="isAdminUser" index="/user-management">
           <el-icon><Avatar /></el-icon>
           <span>User Management</span>
         </el-menu-item>
@@ -87,10 +87,12 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import userApi from '../api/user'
+import { isAdmin } from '../utils/auth'
 
 const route = useRoute()
 const router = useRouter()
 const userInfo = ref(null)
+const isAdminUser = ref(false)
 
 const activeMenu = computed(() => route.path)
 
@@ -124,14 +126,27 @@ onMounted(async () => {
   const userInfoStr = localStorage.getItem('userInfo')
   if (userInfoStr) {
     userInfo.value = JSON.parse(userInfoStr)
+    // 检查是否为管理员
+    isAdminUser.value = isAdmin()
   }
   
   // Initialize backend loginUser to ensure subsequent API calls work properly
   const token = localStorage.getItem('token')
   if (token) {
     try {
-      // Call getUserInfo to initialize backend loginUser member variable
-      await userApi.getUserInfo(token)
+      // Call getUserInfo to initialize backend loginUser member variable and refresh user info
+      const freshUserInfo = await userApi.getUserInfo(token)
+      if (freshUserInfo) {
+        // 更新用户信息，包括角色
+        const updatedUserInfo = {
+          ...userInfo.value,
+          ...freshUserInfo,
+          username: freshUserInfo.name || userInfo.value?.username
+        }
+        userInfo.value = updatedUserInfo
+        localStorage.setItem('userInfo', JSON.stringify(updatedUserInfo))
+        isAdminUser.value = isAdmin()
+      }
     } catch (error) {
       console.error('Failed to initialize user info:', error)
       // If failed, can choose to redirect to login page
@@ -187,6 +202,9 @@ onMounted(async () => {
   letter-spacing: 1px;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   z-index: 1;
+  margin: 0;
+  text-align: center;
+  width: 100%;
 }
 
 .sidebar-menu {

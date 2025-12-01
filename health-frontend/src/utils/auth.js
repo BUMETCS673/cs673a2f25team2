@@ -54,5 +54,17 @@ export function isLoggedIn() {
   return !!getToken()
 }
 
+/**
+ * Check if user is admin
+ */
+export function isAdmin() {
+  const userInfo = getUserInfo()
+  if (!userInfo) return false
+  
+  // 检查roles数组中是否包含'admin'
+  const roles = userInfo.roles || []
+  return roles.includes('admin')
+}
+
 
 
