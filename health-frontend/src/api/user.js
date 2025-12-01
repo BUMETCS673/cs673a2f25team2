@@ -102,6 +102,14 @@ export default {
       url: '/user/getUserId',
       method: 'get'
     })
+  },
+  
+  // Get body notes count
+  getBodyNotesCount() {
+    return request({
+      url: '/user/getBodyNotesCount',
+      method: 'get'
+    })
   }
 }
 

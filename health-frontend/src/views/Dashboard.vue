@@ -10,7 +10,7 @@
 <template>
   <div class="dashboard">
     <el-row :gutter="20">
-      <el-col :span="6">
+      <el-col :span="8">
         <el-card class="stat-card">
           <div class="stat-item">
             <div class="stat-icon" style="background-color: #409EFF;">
@@ -23,7 +23,7 @@
           </div>
         </el-card>
       </el-col>
-      <el-col :span="6">
+      <el-col :span="8">
         <el-card class="stat-card">
           <div class="stat-item">
             <div class="stat-icon" style="background-color: #67C23A;">
@@ -36,7 +36,7 @@
           </div>
         </el-card>
       </el-col>
-      <el-col :span="6">
+      <el-col :span="8">
         <el-card class="stat-card">
           <div class="stat-item">
             <div class="stat-icon" style="background-color: #E6A23C;">
@@ -45,19 +45,6 @@
             <div class="stat-content">
               <div class="stat-value">{{ stats.totalSports }}</div>
               <div class="stat-label">Sports Knowledge</div>
-            </div>
-          </div>
-        </el-card>
-      </el-col>
-      <el-col :span="6">
-        <el-card class="stat-card">
-          <div class="stat-item">
-            <div class="stat-icon" style="background-color: #F56C6C;">
-              <el-icon><TrendCharts /></el-icon>
-            </div>
-            <div class="stat-content">
-              <div class="stat-value">{{ stats.todayActive }}</div>
-              <div class="stat-label">Today Active</div>
             </div>
           </div>
         </el-card>
@@ -71,7 +58,7 @@
             <span>Welcome to Health Management System</span>
           </template>
           <div class="welcome-content">
-            <p>Welcome, {{ userInfo?.username }}!</p>
+            <p>Welcome, {{ displayName || 'User' }}!</p>
             <p>You can manage your health information, view sports knowledge, record physical conditions, etc.</p>
             <el-button type="primary" @click="$router.push('/body-info')">
               Start Managing Health Information
@@ -105,32 +92,137 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { User, Document, Basketball, TrendCharts } from '@element-plus/icons-vue'
+import { ref, computed, onMounted } from 'vue'
+import { User, Document, Basketball } from '@element-plus/icons-vue'
+import userApi from '../api/user'
+import sportApi from '../api/sport'
+import bodyApi from '../api/body'
 
 const userInfo = ref(null)
 const stats = ref({
   totalUsers: 0,
   totalRecords: 0,
-  totalSports: 0,
-  todayActive: 0
+  totalSports: 0
 })
 
-onMounted(() => {
+// 计算显示的用户名，优先使用username，其次使用name
+const displayName = computed(() => {
+  if (!userInfo.value) return ''
+  return userInfo.value.username || userInfo.value.name || ''
+})
+
+onMounted(async () => {
+  // 从localStorage加载用户信息
   const userInfoStr = localStorage.getItem('userInfo')
   if (userInfoStr) {
-    userInfo.value = JSON.parse(userInfoStr)
+    try {
+      userInfo.value = JSON.parse(userInfoStr)
+    } catch (error) {
+      console.error('Failed to parse userInfo:', error)
+    }
   }
   
-  // Statistics can be loaded here
-  // Temporarily using mock data
-  stats.value = {
-    totalUsers: 128,
-    totalRecords: 256,
-    totalSports: 32,
-    todayActive: 45
+  // 刷新用户信息以确保数据最新
+  const token = localStorage.getItem('token')
+  if (token) {
+    try {
+      const freshUserInfo = await userApi.getUserInfo(token)
+      if (freshUserInfo) {
+        // 更新用户信息，确保username字段存在
+        const updatedUserInfo = {
+          ...userInfo.value,
+          ...freshUserInfo,
+          username: freshUserInfo.name || userInfo.value?.username || freshUserInfo.username
+        }
+        userInfo.value = updatedUserInfo
+        localStorage.setItem('userInfo', JSON.stringify(updatedUserInfo))
+      }
+    } catch (error) {
+      console.error('Failed to refresh user info:', error)
+    }
   }
+  
+  // 加载统计数据
+  await loadStatistics()
 })
+
+const loadStatistics = async () => {
+  // 获取用户总数
+  try {
+    const userListData = await userApi.getUserList({ 
+      pageNo: 1, 
+      pageSize: 10000,  // 获取全部数据以确保统计准确
+      username: undefined,
+      phone: undefined
+    })
+    // 如果total为0但rows有数据，使用rows的长度
+    if (userListData && typeof userListData === 'object') {
+      if (userListData.total !== undefined && userListData.total !== null && userListData.total > 0) {
+        stats.value.totalUsers = userListData.total
+      } else if (userListData.rows && userListData.rows.length > 0) {
+        stats.value.totalUsers = userListData.rows.length
+      }
+    }
+  } catch (error) {
+    console.warn('Failed to load user count, using default value:', error)
+  }
+
+  // 获取运动知识总数
+  try {
+    const sportListData = await sportApi.getSportList({ 
+      pageNo: 1, 
+      pageSize: 10000,  // 获取全部数据以确保统计准确
+      sportType: undefined
+    })
+    // 如果total为0但rows有数据，使用rows的长度
+    if (sportListData && typeof sportListData === 'object') {
+      if (sportListData.total !== undefined && sportListData.total !== null && sportListData.total > 0) {
+        stats.value.totalSports = sportListData.total
+      } else if (sportListData.rows && sportListData.rows.length > 0) {
+        stats.value.totalSports = sportListData.rows.length
+      }
+    }
+  } catch (error) {
+    console.warn('Failed to load sport count, using default value:', error)
+  }
+
+  // 获取健康记录总数
+  try {
+    // 先尝试使用专门的计数API
+    const bodyNotesCountData = await userApi.getBodyNotesCount()
+    if (typeof bodyNotesCountData === 'number' && bodyNotesCountData > 0) {
+      stats.value.totalRecords = bodyNotesCountData
+    } else {
+      // 如果计数API返回0或失败，尝试获取全部数据计算
+      const bodyListData = await bodyApi.getUserBodyList({ 
+        pageNo: 1, 
+        pageSize: 10000 
+      })
+      if (bodyListData && typeof bodyListData === 'object') {
+        if (bodyListData.total !== undefined && bodyListData.total !== null && bodyListData.total > 0) {
+          stats.value.totalRecords = bodyListData.total
+        } else if (bodyListData.rows && bodyListData.rows.length > 0) {
+          stats.value.totalRecords = bodyListData.rows.length
+        }
+      }
+    }
+  } catch (error) {
+    console.warn('Failed to load body notes count, using default value:', error)
+    // 如果新API不存在，尝试使用旧方法
+    try {
+      const bodyListData = await bodyApi.getBodyList({ pageNo: 1, pageSize: 10000 })
+      if (bodyListData && typeof bodyListData === 'object') {
+        if (bodyListData.total !== undefined && bodyListData.total !== null && bodyListData.total > 0) {
+          stats.value.totalRecords = bodyListData.total
+        } else if (bodyListData.rows && bodyListData.rows.length > 0) {
+          stats.value.totalRecords = bodyListData.rows.length
+        }
+      }
+    } catch (fallbackError) {
+      console.warn('Fallback method also failed:', fallbackError)
+    }
+  }
+}
 </script>
 
 <style scoped>

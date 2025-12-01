@@ -46,13 +46,13 @@
       </el-table>
 
       <el-pagination
-        v-model:current-page="pageNo"
-        v-model:page-size="pageSize"
+        :current-page="pageNo"
+        :page-size="pageSize"
         :total="total"
         :page-sizes="[10, 20, 50, 100]"
         layout="total, sizes, prev, pager, next, jumper"
-        @size-change="loadData"
-        @current-change="loadData"
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
         style="margin-top: 20px; justify-content: flex-end;"
       />
     </el-card>
@@ -96,6 +96,7 @@ import { Search } from '@element-plus/icons-vue'
 import sportApi from '../api/sport'
 
 const tableData = ref([])
+const allData = ref([])  // 存储所有数据，用于前端分页
 const loading = ref(false)
 const submitting = ref(false)
 const showDialog = ref(false)
@@ -105,6 +106,7 @@ const pageNo = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
 const searchKeyword = ref('')
+const lastSearchKeyword = ref('')  // 记录上次搜索关键词，用于判断是否需要重新加载
 
 const form = reactive({
   sportType: '',
@@ -119,16 +121,60 @@ const rules = {
 }
 
 const loadData = async () => {
+  // 使用响应式变量的值
+  await loadDataWithParams(pageNo.value, pageSize.value)
+}
+
+const handleSizeChange = (newPageSize) => {
+  pageSize.value = newPageSize
+  pageNo.value = 1  // 重置到第一页
+  loadDataWithParams(1, newPageSize)
+}
+
+const handleCurrentChange = (newPageNo) => {
+  pageNo.value = newPageNo
+  loadDataWithParams(newPageNo, pageSize.value)
+}
+
+// 新增：带参数的加载函数 - 实现前端分页
+const loadDataWithParams = async (currentPageNo, currentPageSize) => {
   loading.value = true
   try {
-    const data = await sportApi.getSportList({
-      pageNo: pageNo.value,
-      pageSize: pageSize.value,
-      sportType: searchKeyword.value || undefined
-    })
-    tableData.value = data.rows || []
-    total.value = data.total || 0
+    // 如果搜索关键词改变，需要重新加载全部数据
+    const needReload = searchKeyword.value !== lastSearchKeyword.value
+    
+    // 如果还没有加载过全部数据，或者搜索关键词改变，先获取全部数据
+    if (allData.value.length === 0 || needReload) {
+      // 获取所有数据（使用大pageSize确保获取全部）
+      const data = await sportApi.getSportList({
+        pageNo: 1,
+        pageSize: 10000,
+        sportType: searchKeyword.value || undefined
+      })
+      
+      // 存储全部数据
+      allData.value = data?.rows || []
+      
+      // 设置total
+      if (data?.total !== undefined && data?.total !== null && data.total > 0) {
+        total.value = data.total
+      } else if (allData.value.length > 0) {
+        total.value = allData.value.length
+      } else {
+        total.value = 0
+      }
+      
+      // 更新搜索关键词记录
+      lastSearchKeyword.value = searchKeyword.value
+    }
+    
+    // 前端分页：根据当前页码和每页大小切片数据
+    const startIndex = (currentPageNo - 1) * currentPageSize
+    const endIndex = startIndex + currentPageSize
+    tableData.value = allData.value.slice(startIndex, endIndex)
+    
   } catch (error) {
+    console.error('Failed to load data:', error)
     ElMessage.error('Failed to load data')
   } finally {
     loading.value = false
@@ -137,6 +183,9 @@ const loadData = async () => {
 
 const handleSearch = () => {
   pageNo.value = 1
+  // 清空缓存，重新加载
+  allData.value = []
+  lastSearchKeyword.value = ''
   loadData()
 }
 
@@ -174,6 +223,8 @@ const handleDelete = async (row) => {
     try {
       await sportApi.deleteSport(row.id)
       ElMessage.success('Deleted successfully')
+      // 清空缓存，重新加载全部数据
+      allData.value = []
       loadData()
     } catch (error) {
       ElMessage.error('Failed to delete')
@@ -195,6 +246,8 @@ const handleSubmit = async () => {
           ElMessage.success('Added successfully')
         }
         showDialog.value = false
+        // 清空缓存，重新加载全部数据
+        allData.value = []
         loadData()
       } catch (error) {
         ElMessage.error(error.message || 'Operation failed')

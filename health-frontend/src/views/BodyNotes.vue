@@ -38,13 +38,13 @@
       </el-table>
 
       <el-pagination
-        v-model:current-page="pageNo"
-        v-model:page-size="pageSize"
+        :current-page="pageNo"
+        :page-size="pageSize"
         :total="total"
         :page-sizes="[10, 20, 50, 100]"
         layout="total, sizes, prev, pager, next, jumper"
-        @size-change="loadData"
-        @current-change="loadData"
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
         style="margin-top: 20px; justify-content: flex-end;"
       />
     </el-card>
@@ -134,6 +134,7 @@ import bodyApi from '../api/body'
 import userApi from '../api/user'
 
 const tableData = ref([])
+const allData = ref([])  // 存储所有数据，用于前端分页
 const loading = ref(false)
 const submitting = ref(false)
 const showDialog = ref(false)
@@ -176,17 +177,61 @@ const formatDate = (date) => {
 }
 
 const loadData = async () => {
+  // 使用响应式变量的值
+  await loadDataWithParams(pageNo.value, pageSize.value)
+}
+
+const handleSizeChange = (newPageSize) => {
+  console.log('handleSizeChange - newPageSize:', newPageSize)
+  pageSize.value = newPageSize
+  pageNo.value = 1  // 重置到第一页
+  // 直接使用新值调用，确保参数正确
+  loadDataWithParams(1, newPageSize)
+}
+
+const handleCurrentChange = (newPageNo) => {
+  console.log('handleCurrentChange - newPageNo:', newPageNo)
+  pageNo.value = newPageNo
+  // 直接使用新值调用，确保参数正确
+  loadDataWithParams(newPageNo, pageSize.value)
+}
+
+// 新增：带参数的加载函数 - 实现前端分页
+const loadDataWithParams = async (currentPageNo, currentPageSize) => {
   loading.value = true
   try {
-    // Remove code to get userId, as getUserBodyList handles it internally
-    // Get user's body records list
-    const data = await bodyApi.getUserBodyList({
-      pageNo: pageNo.value,
-      pageSize: pageSize.value
-    })
+    console.log('loadDataWithParams调用 - pageNo:', currentPageNo, 'pageSize:', currentPageSize)
     
-    tableData.value = data.rows || []
-    total.value = data.total || 0
+    // 如果还没有加载过全部数据，先获取全部数据
+    if (allData.value.length === 0) {
+      // 获取所有数据（使用大pageSize确保获取全部）
+      const data = await bodyApi.getUserBodyList({
+        pageNo: 1,
+        pageSize: 10000
+      })
+      
+      console.log('API返回全部数据 - rows数量:', data?.rows?.length, 'total:', data?.total)
+      
+      // 存储全部数据
+      allData.value = data?.rows || []
+      
+      // 设置total
+      if (data?.total !== undefined && data?.total !== null && data.total > 0) {
+        total.value = data.total
+      } else if (allData.value.length > 0) {
+        total.value = allData.value.length
+      } else {
+        total.value = 0
+      }
+    }
+    
+    // 前端分页：根据当前页码和每页大小切片数据
+    const startIndex = (currentPageNo - 1) * currentPageSize
+    const endIndex = startIndex + currentPageSize
+    tableData.value = allData.value.slice(startIndex, endIndex)
+    
+    console.log('前端分页后 - 显示数量:', tableData.value.length, '总数据:', allData.value.length, '当前页:', currentPageNo)
+    
   } catch (error) {
     console.error('Failed to load data:', error)
     ElMessage.error('Failed to load data')
@@ -279,7 +324,8 @@ const syncAllRecordsBasicInfo = async () => {
     
     if (updateCount > 0) {
       console.log(`Synchronized basic information of ${updateCount} records`)
-      // Reload current page data
+      // 清空缓存，重新加载全部数据
+      allData.value = []
       await loadData()
     }
   } catch (error) {
@@ -367,6 +413,8 @@ const handleDelete = async (row) => {
     try {
       await bodyApi.deleteUserBody(row.notesid)
       ElMessage.success('Delete successful')
+      // 清空缓存，重新加载全部数据
+      allData.value = []
       loadData()
     } catch (error) {
       ElMessage.error('Delete failed')
@@ -436,6 +484,8 @@ const handleSubmit = async () => {
           ElMessage.success('Add successful')
         }
         showDialog.value = false
+        // 清空缓存，重新加载全部数据
+        allData.value = []
         loadData()
       } catch (error) {
         console.error('Operation failed:', error)
