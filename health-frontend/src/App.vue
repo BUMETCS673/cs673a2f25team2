@@ -26,7 +26,7 @@
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
-/* 全局滚动条样式 */
+/* Global scrollbar styles */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -46,7 +46,7 @@
   background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
 }
 
-/* 全局卡片动画 */
+/* Global card animation */
 .el-card {
   transition: all 0.3s ease;
   border-radius: 12px;
@@ -58,7 +58,7 @@
   transform: translateY(-2px);
 }
 
-/* 全局按钮动画 */
+/* Global button animation */
 .el-button {
   transition: all 0.3s ease;
   border-radius: 6px;
@@ -69,7 +69,7 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-/* 全局输入框样式 */
+/* Global input styles */
 .el-input__wrapper {
   border-radius: 6px;
   transition: all 0.3s ease;
@@ -79,7 +79,7 @@
   box-shadow: 0 0 0 1px #c0c4cc inset;
 }
 
-/* 全局表格样式 */
+/* Global table styles */
 .el-table {
   border-radius: 8px;
   overflow: hidden;
@@ -90,7 +90,7 @@
   font-weight: 600;
 }
 
-/* 全局分页样式 */
+/* Global pagination styles */
 .el-pagination {
   margin-top: 20px;
 }

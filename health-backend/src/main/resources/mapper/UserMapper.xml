@@ -6,9 +6,9 @@
         b.role_name
         FROM j_user_role a, j_role b
         WHERE
-        <!-- 进行内连接，即只返回两张表中都存在的 role_id 值对应的记录。 -->
+        <!-- Perform inner join, only return records where role_id exists in both tables. -->
         a.role_id=b.role_id
-        <!-- 在连接的结果集中，筛选出 user_id 等于输入参数 userId 的记录。 -->
+        <!-- In the joined result set, filter out records where user_id equals the input parameter userId. -->
         AND a.user_id=#{userId}
     </select>
 </mapper>

@@ -9,7 +9,7 @@
 import request from './request'
 
 export default {
-  // 登录
+  // Login
   login(data) {
     return request({
       url: '/user/login',
@@ -18,7 +18,7 @@ export default {
     })
   },
   
-  // 注册
+  // Register
   register(data) {
     return request({
       url: '/user/register',
@@ -27,7 +27,7 @@ export default {
     })
   },
   
-  // 获取用户信息
+  // Get user information
   getUserInfo(token) {
     return request({
       url: '/user/info',
@@ -36,7 +36,7 @@ export default {
     })
   },
   
-  // 退出登录
+  // Logout
   logout() {
     return request({
       url: '/user/logout',
@@ -44,7 +44,7 @@ export default {
     })
   },
   
-  // 获取用户列表
+  // Get user list
   getUserList(params) {
     return request({
       url: '/user/list',
@@ -53,7 +53,7 @@ export default {
     })
   },
   
-  // 添加用户
+  // Add user
   addUser(data) {
     return request({
       url: '/user/add',
@@ -62,7 +62,7 @@ export default {
     })
   },
   
-  // 更新用户
+  // Update user
   updateUser(data) {
     return request({
       url: '/user/update',
@@ -71,7 +71,7 @@ export default {
     })
   },
   
-  // 根据ID获取用户
+  // Get user by ID
   getUserById(id) {
     return request({
       url: `/user/${id}`,
@@ -79,7 +79,7 @@ export default {
     })
   },
   
-  // 删除用户
+  // Delete user
   deleteUser(id) {
     return request({
       url: `/user/${id}`,
@@ -87,7 +87,7 @@ export default {
     })
   },
   
-  // 修改密码
+  // Change password
   changePassword(data) {
     return request({
       url: '/user/changePassword',
@@ -96,7 +96,7 @@ export default {
     })
   },
   
-  // 获取用户ID
+  // Get user ID
   getUserId() {
     return request({
       url: '/user/getUserId',

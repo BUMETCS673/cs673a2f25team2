@@ -5,6 +5,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -13,10 +14,12 @@ import java.util.UUID;
 
 @Component
 public class JwtConfig {
-    // 有效期
-    private static final long JWT_EXPIRE = 60 * 180 * 1000L; // 1小时
-    // 密钥（需为 Base64 编码字符串）
-    private static final String JWT_KEY = "y3aX2K8/4TdF6zBmQv7hPwScN9jLgRtA+UoWxEiYlDn5fMpGqHtJkKuV"; // 示例密钥，需替换
+    // Validity period
+    private static final long JWT_EXPIRE = 60 * 180 * 1000L; // 1 hour
+    
+    // Read key from environment variable or configuration file (prefer environment variable JWT_SECRET)
+    @Value("${jwt.secret:${JWT_SECRET:y3aX2K8/4TdF6zBmQv7hPwScN9jLgRtA+UoWxEiYlDn5fMpGqHtJkKuV}}")
+    private String jwtKey;
 
     public String createToken(Object data) {
         return Jwts.builder()
@@ -25,20 +28,20 @@ public class JwtConfig {
                 .issuer("system")
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + JWT_EXPIRE))
-                .signWith(getSigningKey(), Jwts.SIG.HS256) // 使用新版签名方法
+                .signWith(getSigningKey(), Jwts.SIG.HS256) // Use new version signature method
                 .compact();
     }
 
     private SecretKey getSigningKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(JWT_KEY); // 解码 Base64 密钥
-        return Keys.hmacShaKeyFor(keyBytes); // 生成 HMAC-SHA 密钥
+        byte[] keyBytes = Decoders.BASE64.decode(jwtKey); // Decode Base64 key
+        return Keys.hmacShaKeyFor(keyBytes); // Generate HMAC-SHA key
     }
 
     public Claims parseToken(String token) {
         return Jwts.parser()
-                .verifyWith(getSigningKey()) // 验证密钥
+                .verifyWith(getSigningKey()) // Verify key
                 .build()
-                .parseSignedClaims(token)   // 替换旧版 parseClaimsJws
+                .parseSignedClaims(token)   // Replace old version parseClaimsJws
                 .getPayload();
     }
 

@@ -5,9 +5,9 @@
         SELECT a.`menu_id`
         FROM j_role_menu a, j_menu b
         WHERE a.`menu_id` = b.`menu_id`
-        <!--表示只查询叶子节点菜单的ID，因为非叶子节点的菜单不应该被授予权限。-->
+        <!-- Indicates only query leaf node menu IDs, because non-leaf node menus should not be granted permissions. -->
         AND b.`is_leaf` = 'Y'
-        <!-- 表示查询具有特定角色ID的菜单ID，以获取该角色的权限列表。 -->
+        <!-- Indicates query menu IDs with specific role ID to get the permission list for that role. -->
         AND a.`role_id` = #{roleId}
     </select>
 

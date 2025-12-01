@@ -13,6 +13,8 @@ import com.shanzhu.health.service.IBodyService;
 import com.shanzhu.health.service.IMenuService;
 import com.shanzhu.health.service.IUserRoleService;
 import com.shanzhu.health.service.IUserService;
+import com.shanzhu.health.utils.DataEncryptionUtil;
+import com.shanzhu.health.utils.PasswordUtil;
 import jakarta.annotation.Resource;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,26 +50,55 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     private User loginUser = null;
     @Autowired
     private IBodyService bodyMapper;
+    
+    /**
+     * Decrypt user sensitive information (email, phone)
+     * @param user User object
+     */
+    private void decryptUserSensitiveData(User user) {
+        if (user != null) {
+            if (user.getEmail() != null && !user.getEmail().isEmpty()) {
+                user.setEmail(DataEncryptionUtil.decrypt(user.getEmail()));
+            }
+            if (user.getPhone() != null && !user.getPhone().isEmpty()) {
+                user.setPhone(DataEncryptionUtil.decrypt(user.getPhone()));
+            }
+        }
+    }
+    
+    /**
+     * Encrypt user sensitive information (email, phone)
+     * @param user User object
+     */
+    private void encryptUserSensitiveData(User user) {
+        if (user != null) {
+            if (user.getEmail() != null && !user.getEmail().isEmpty()) {
+                user.setEmail(DataEncryptionUtil.encrypt(user.getEmail()));
+            }
+            if (user.getPhone() != null && !user.getPhone().isEmpty()) {
+                user.setPhone(DataEncryptionUtil.encrypt(user.getPhone()));
+            }
+        }
+    }
 
 
     @Override
     public Map<String, Object> login(User user) {
-        // 根据用户名和密码查询
+        // Query user by username
         LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(User::getUsername, user.getUsername());
-        wrapper.eq(User::getPassword, user.getPassword());
         User loginUser = this.baseMapper.selectOne(wrapper);
 
-        // 如果查询到了用户，则生成Token返回给前端
-        if (loginUser != null) {
-            // 将用户密码设置为 null，避免密码泄露
+        // Verify password (using BCrypt encryption verification)
+        if (loginUser != null && PasswordUtil.matches(user.getPassword(), loginUser.getPassword())) {
+            // Set user password to null to avoid password leakage
             loginUser.setPassword(null);
 
-            String token = jwtConfig.createToken(loginUser); //创建 Token
+            String token = jwtConfig.createToken(loginUser); // Create Token
             Map<String, Object> data = new HashMap<>();
             data.put("token", token);
-            data.put("username", loginUser.getUsername()); // 添加用户名
-            data.put("id", loginUser.getId()); // 添加用户ID
+            data.put("username", loginUser.getUsername()); // Add username
+            data.put("id", loginUser.getId()); // Add user ID
             return data;
         }
         return null;
@@ -76,18 +107,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
     @Override
     public Map<String, Object> Wxlogin(User user) {
-        // 根据用户名和密码查询
+        // Query user by username
         LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(User::getUsername, user.getUsername());
-        wrapper.eq(User::getPassword, user.getPassword());
         User loginUser = this.baseMapper.selectOne(wrapper);
 
-        // 如果查询到了用户，则生成Token返回给前端
-        if (loginUser != null) {
-            // 将用户密码设置为 null，避免密码泄露
+        // Verify password (using BCrypt encryption verification)
+        if (loginUser != null && PasswordUtil.matches(user.getPassword(), loginUser.getPassword())) {
+            // Set user password to null to avoid password leakage
             loginUser.setPassword(null);
 
-            String token = jwtConfig.createToken(loginUser); //创建 Token
+            String token = jwtConfig.createToken(loginUser); // Create Token
             Map<String, Object> data = new HashMap<>();
             data.put("token", token);
             return data;
@@ -99,7 +129,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     @Override
     public Map<String, Object> getUserInfo(String token) {
         try {
-            // 通过 JWT 解析 token 得到用户信息
+            // Parse token through JWT to get user information
             loginUser = jwtConfig.parseToken(token, User.class);
 
         } catch (Exception e) {
@@ -107,16 +137,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         }
 
         if (loginUser != null) {
-            // 如果获取到了用户信息，则组装返回数据
+            // If user information is obtained, assemble return data
             Map<String, Object> data = new HashMap<>();
             data.put("name", loginUser.getUsername());
             data.put("avatar", loginUser.getAvatar());
             data.put("id", loginUser.getId());
-            // 获取用户角色列表
+            // Get user role list
             List<String> roleList = this.baseMapper.getRoleNameByUserId(loginUser.getId());
             data.put("roles", roleList);
 
-            // 获取用户菜单列表
+            // Get user menu list
             List<Menu> menuList = menuService.getMenuListByUserId(loginUser.getId());
             data.put("menuList", menuList);
             return data;
@@ -138,13 +168,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         if (count > 0) {
             return false;
         } else {
-            // 写入用户表
+            // Encrypt password
+            if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+                user.setPassword(PasswordUtil.encode(user.getPassword()));
+            }
+            // Encrypt personal information (email, phone)
+            encryptUserSensitiveData(user);
+            // Write to user table
             this.baseMapper.insert(user);
-            // 写入用户角色表
-            List<Integer> roleIdList = user.getRoleIdList();// 获取用户角色ID列表
+            // Write to user role table
+            List<Integer> roleIdList = user.getRoleIdList();// Get user role ID list
             if (roleIdList != null) {
                 for (Integer roleId : roleIdList) {
-                    // 将角色ID和用户ID插入到用户角色表中
+                    // Insert role ID and user ID into user role table
                     userRoleMapper.insert(new UserRole(null, user.getId(), roleId));
                 }
             }
@@ -156,22 +192,25 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     @Override
     public User getUserById(Integer id) {
 
-        // 根据用户ID查询用户信息
+        // Query user information by user ID
         User user = this.baseMapper.selectById(id);
         System.out.println(user);
-        // 根据用户ID查询用户角色列表
+        // Query user role list by user ID
         LambdaQueryWrapper<UserRole> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(UserRole::getUserId, id);
-        List<UserRole> userRoleList = userRoleMapper.selectList(wrapper); // 从用户角色表中查询出所有用户角色，并赋值给userRoleList变量
+        List<UserRole> userRoleList = userRoleMapper.selectList(wrapper); // Query all user roles from user role table and assign to userRoleList variable
 
-        // 将用户角色ID列表设置到用户对象中
-        List<Integer> roleIdList = userRoleList.stream() // 将 userRoleList 转化为一个 Stream<UserRole> 对象，使得可以对其中的每一个元素进行操作
+        // Set user role ID list to user object
+        List<Integer> roleIdList = userRoleList.stream() // Convert userRoleList to a Stream<UserRole> object to operate on each element
                 .map(userRole -> {
                     return userRole.getRoleId();
                 })
-                .collect(Collectors.toList()); // 将每个roleId值收集到一个List<Integer>对象中，并赋值给roleIdList变量
-        user.setRoleIdList(roleIdList); // 将roleIdList设置到user对象中的roleIdList属性中
+                .collect(Collectors.toList()); // Collect each roleId value into a List<Integer> object and assign to roleIdList variable
+        user.setRoleIdList(roleIdList); // Set roleIdList to the roleIdList property of user object
 
+        // Decrypt sensitive information
+        decryptUserSensitiveData(user);
+        
         return user;
     }
 
@@ -179,17 +218,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     @Override
     @Transactional
     public void updateUser(User user) {
-        // 更新用户表
+        // Encrypt personal information (email, phone)
+        encryptUserSensitiveData(user);
+        // Update user table
         this.baseMapper.updateById(user);
-        // 清除原有的角色
+        // Clear existing roles
         LambdaQueryWrapper<UserRole> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(UserRole::getUserId, user.getId());
         userRoleMapper.delete(wrapper);
-        // 设置新的角色
-        List<Integer> roleIdList = user.getRoleIdList(); // 获取用户新的角色 ID 列表
+        // Set new roles
+        List<Integer> roleIdList = user.getRoleIdList(); // Get user's new role ID list
         if (roleIdList != null) {
             for (Integer roleId : roleIdList) {
-                // 设置新角色
+                // Set new role
                 userRoleMapper.insert(new UserRole(null, user.getId(), roleId));
             }
         }
@@ -198,12 +239,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
     @Override
     public void deletUserById(Integer id) {
-        // 通过用户ID删除用户
+        // Delete user by user ID
         this.baseMapper.deleteById(id);
-        // 清除原有角色
+        // Clear existing roles
         LambdaQueryWrapper<UserRole> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(UserRole::getUserId, id); // 查询条件：用户ID等于id
-        userRoleMapper.delete(wrapper); // 执行删除操作
+        wrapper.eq(UserRole::getUserId, id); // Query condition: user ID equals id
+        userRoleMapper.delete(wrapper); // Execute delete operation
     }
 
 
@@ -211,23 +252,27 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     public Map<String, Object> register(User user) {
         LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
         Map<String, Object> map = new HashMap<>();
-        // 查询用户名是否已存在
+        // Check if username already exists
         wrapper.eq(User::getUsername, user.getUsername());
         Long count = this.baseMapper.selectCount(wrapper);
         if (count > 0) {
             map.put("fail", false);
             return map;
         } else {
+            // Encrypt password
+            user.setPassword(PasswordUtil.encode(user.getPassword()));
+            // Encrypt personal information (email, phone)
+            encryptUserSensitiveData(user);
             user.setAvatar("https://bpic.51yuansu.com/pic2/cover/00/35/43/58119f542530c_610.jpg");
             this.baseMapper.insert(user);
-            // 获取插入数据后的ID
+            // Get ID after inserting data
             Integer userId = user.getId();
-            // 创建UserRole对象，并设置角色
+            // Create UserRole object and set role
             UserRole userRole = new UserRole();
             userRole.setUserId(userId);
             userRole.setRoleId(3);
 
-            // 插入到数据库中
+            // Insert into database
             boolean result = userRoleService.save(userRole);
             if (result) {
                 map.put("success", true);
@@ -242,7 +287,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     @Override
     public Map<String, Object> getUserId() {
         Map<String, Object> data = new HashMap<>();
-        // 添加键为 "id"，值为当前登录用户的 ID
+        // Add key "id" with value of current logged-in user's ID
         if (data != null) {
             data.put("id", loginUser.getId());
             return data;
@@ -255,14 +300,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     public Map<String, Object> WxgetUserId(String token) {
         User WxloginUser = null;
         try {
-            // 通过 JWT 解析 token 得到用户信息
+            // Parse token through JWT to get user information
             WxloginUser = jwtConfig.parseToken(token, User.class);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         if (WxloginUser != null) {
-            // 如果获取到了用户信息，则组装返回数据
+            // If user information is obtained, assemble return data
             Map<String, Object> data = new HashMap<>();
             data.put("id", WxloginUser.getId());
             return data;
@@ -287,13 +332,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     @Override
     public boolean updateuser(User user) {
         LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(User::getUsername, user.getUsername())
-                .eq(User::getPassword, user.getPassword());
-        // 查询数据库中是否存在匹配的用户
+        wrapper.eq(User::getUsername, user.getUsername());
+        // Query user
         User oldPassword = this.baseMapper.selectOne(wrapper);
-        if (oldPassword != null) {
-            // 找到匹配的用户，更新密码
-            oldPassword.setPassword(user.getNewPassword());
+        // Verify old password
+        if (oldPassword != null && PasswordUtil.matches(user.getPassword(), oldPassword.getPassword())) {
+            // Encrypt new password
+            oldPassword.setPassword(PasswordUtil.encode(user.getNewPassword()));
             this.baseMapper.updateById(oldPassword);
             return true;
         }

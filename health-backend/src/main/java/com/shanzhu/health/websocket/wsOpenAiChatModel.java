@@ -11,9 +11,9 @@ public class wsOpenAiChatModel {
     @Autowired
     private OpenAiChatModel openAiChatModel;
 
-    // 接收消息msg并返回流式数据
+    // Receive message msg and return streaming data
     public Flux<String> stream(String msg) {
-        // 将msg传递给openAiChatModel并返回流式数据
+        // Pass msg to openAiChatModel and return streaming data
         return openAiChatModel.stream(msg);
     }
 }

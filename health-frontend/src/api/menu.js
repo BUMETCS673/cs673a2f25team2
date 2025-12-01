@@ -9,7 +9,7 @@
 import request from './request'
 
 export default {
-  // 获取所有菜单
+  // Get all menus
   getAllMenu() {
     return request({
       url: '/menu',

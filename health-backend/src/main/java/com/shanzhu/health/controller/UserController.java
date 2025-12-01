@@ -11,6 +11,7 @@ import com.shanzhu.health.entity.User;
 import com.shanzhu.health.service.IBodyNotesService;
 import com.shanzhu.health.service.IBodyService;
 import com.shanzhu.health.service.IUserService;
+import com.shanzhu.health.utils.DataEncryptionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +31,7 @@ public class UserController {
 
     @Autowired
     private IBodyNotesService bodyNotesService;
+
 
     @GetMapping("/all")
     public Unification<List<User>> getAllUser() {
@@ -71,30 +73,30 @@ public class UserController {
 
     @GetMapping("/info")
     public Unification<Map<String, Object>> getUserInfo(@RequestParam("token") String token) {
-        // 根据token获取用户信息
-        Map<String, Object> data = userService.getUserInfo(token); // 调用userService的getUserInfo方法，传递token参数，返回一个Map<String,Object>类型的data
+        // Get user information based on token
+        Map<String, Object> data = userService.getUserInfo(token); // Call userService's getUserInfo method, pass token parameter, return a Map<String,Object> type data
         if (data != null) {
-            return Unification.success(data); // 如果data不为null，返回成功响应，将data作为响应数据返回
+            return Unification.success(data); // If data is not null, return success response with data as response data
         }
-        return Unification.fail(20003, "Login information incorrect, please login again"); // 如果data为null，返回失败响应，返回错误码和错误信息
+        return Unification.fail(20003, "Login information incorrect, please login again"); // If data is null, return failure response with error code and error message
     }
 
 
     @PostMapping("/logout")
     public Unification<?> logout(@RequestHeader("X-Token") String token) {
-        userService.logout(token);//将当前用户的登录状态从系统中注销
+        userService.logout(token);// Logout current user's login status from the system
         return Unification.success();
     }
 
 
     /**
-     * 根据查询条件获取用户列表，分页查询
+     * Get user list based on query conditions, paginated query
      *
-     * @param username 查询条件：用户名，可选
-     * @param phone    查询条件：手机号，可选
-     * @param pageNo   当前页码
-     * @param pageSize 页面大小
-     * @return 返回Unification包装后的用户列表，包含总数和当前页码的用户信息列表
+     * @param username Query condition: username, optional
+     * @param phone    Query condition: phone number, optional
+     * @param pageNo   Current page number
+     * @param pageSize Page size
+     * @return Returns Unification wrapped user list, containing total count and user information list for current page
      */
     @GetMapping("/list")
     public Unification<Map<String, Object>> getUserList(@RequestParam(value = "username", required = false) String username,
@@ -105,13 +107,30 @@ public class UserController {
         LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
 
         wrapper.eq(StringUtils.hasLength(username), User::getUsername, username);
-        wrapper.eq(StringUtils.hasLength(phone), User::getPhone, phone);
+        // If phone is used as query condition, need to encrypt before querying (because database stores encrypted values)
+        if (StringUtils.hasLength(phone)) {
+            String encryptedPhone = DataEncryptionUtil.encrypt(phone);
+            wrapper.eq(User::getPhone, encryptedPhone);
+        }
         Page<User> page = new Page<>(pageNo, pageSize);
 
         userService.page(page, wrapper);
+        
+        // Decrypt sensitive information in returned results
+        if (page.getRecords() != null) {
+            for (User user : page.getRecords()) {
+                if (user.getEmail() != null && !user.getEmail().isEmpty()) {
+                    user.setEmail(DataEncryptionUtil.decrypt(user.getEmail()));
+                }
+                if (user.getPhone() != null && !user.getPhone().isEmpty()) {
+                    user.setPhone(DataEncryptionUtil.decrypt(user.getPhone()));
+                }
+            }
+        }
+        
         Map<String, Object> data = new HashMap<>();
-        data.put("total", page.getTotal()); // 用户总数
-        data.put("rows", page.getRecords()); // 用户列表
+        data.put("total", page.getTotal()); // Total number of users
+        data.put("rows", page.getRecords()); // User list
         return Unification.success(data);
     }
 
@@ -129,7 +148,7 @@ public class UserController {
 
     @PutMapping("/update")
     public Unification<?> updateUser(@RequestBody User user) {
-        user.setPassword(null); // 防止密码被修改，将密码设为null
+        user.setPassword(null); // Prevent password from being modified, set password to null
         userService.updateUser(user);
         return Unification.success("Update successful");
     }
@@ -137,9 +156,9 @@ public class UserController {
 
     @GetMapping("/{id}")
     public Unification<User> getUserById(@PathVariable("id") Integer id) {
-        // 通过用户id调用userService的getUserById方法获取用户信息
+        // Get user information by calling userService's getUserById method with user id
         User user = userService.getUserById(id);
-        // 将获取到的用户信息封装成Unification类型并返回
+        // Wrap the obtained user information into Unification type and return
         return Unification.success(user);
     }
 
@@ -147,7 +166,7 @@ public class UserController {
     @GetMapping("/getBodyNotes/{id}")
     public Unification<List<BodyNotes>> getBodyNotes(@PathVariable("id") Integer id) {
         List<BodyNotes> bodyNotesList = bodyNotesService.getBodyNotes(id);
-        if (bodyNotesList == null || bodyNotesList.isEmpty()) { // 判断列表是否为空
+        if (bodyNotesList == null || bodyNotesList.isEmpty()) { // Check if list is empty
             return Unification.fail("No additional records found");
         }
         return Unification.success(bodyNotesList);
@@ -156,7 +175,7 @@ public class UserController {
 
     @GetMapping("/WxgetBodyNotes/{token}")
     public Unification<Map<String, Object>> WxgetBodyNotes(@PathVariable("token") String token) {
-        // 根据token获取用户信息
+        // Get user information based on token
         Map<String, Object> data = userService.WxgetUserId(token);
         Integer userId = Integer.parseInt(data.get("id").toString());
         List<BodyNotes> bodyNotes = bodyNotesService.getBodyNotes(userId);
@@ -226,22 +245,22 @@ public class UserController {
         LambdaQueryWrapper<Body> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(StringUtils.hasLength(name), Body::getName, name);
         wrapper.eq(StringUtils.hasLength(id), Body::getId, id);
-        Page<Body> page = new Page<>(pageNo, pageSize); // 构建分页对象，指定页码和每页大小
+        Page<Body> page = new Page<>(pageNo, pageSize); // Build pagination object, specify page number and page size
 
-        bodyService.page(page, wrapper); // 调用userService的分页查询方法，查询指定页码、每页大小和查询条件的用户列表
+        bodyService.page(page, wrapper); // Call userService's pagination query method to query user list with specified page number, page size and query conditions
         Map<String, Object> data = new HashMap<>();
 
-        data.put("total", page.getTotal()); // 将查询到的用户总数放入响应数据中
-        data.put("rows", page.getRecords()); // 将查询到的用户列表放入响应数据中
+        data.put("total", page.getTotal()); // Put the queried total number of users into response data
+        data.put("rows", page.getRecords()); // Put the queried user list into response data
         return Unification.success(data);
     }
 
 
     @GetMapping("/getBodyById/{id}")
     public Unification<Body> getBodyById(@PathVariable("id") Integer id) {
-        // 通过用户id调用userService的getUserById方法获取用户信息
+        // Get user information by calling userService's getUserById method with user id
         Body body = bodyService.getBodyById(id);
-        // 将获取到的用户信息封装成Unification类型并返回
+        // Wrap the obtained user information into Unification type and return
         return Unification.success(body);
     }
 
@@ -281,16 +300,16 @@ public class UserController {
         if (userid.get("id") != null) {
             wrapper.eq(BodyNotes::getId, userid.get("id"));
         } else {
-            // 如果userid.get("id")为null，则返回一个空的查询条件
+            // If userid.get("id") is null, return an empty query condition
             wrapper.isNull(BodyNotes::getId);
         }
 
-        Page<BodyNotes> page = new Page<>(pageNo, pageSize); // 构建分页对象，指定页码和每页大小
-        bodyNotesService.page(page, wrapper); // 调用userService的分页查询方法，查询指定页码、每页大小和查询条件的用户列表
+        Page<BodyNotes> page = new Page<>(pageNo, pageSize); // Build pagination object, specify page number and page size
+        bodyNotesService.page(page, wrapper); // Call userService's pagination query method to query user list with specified page number, page size and query conditions
 
         Map<String, Object> data = new HashMap<>();
-        data.put("total", page.getTotal()); // 将查询到的用户总数放入响应数据中
-        data.put("rows", page.getRecords()); // 将查询到的用户列表放入响应数据中
+        data.put("total", page.getTotal()); // Put the queried total number of users into response data
+        data.put("rows", page.getRecords()); // Put the queried user list into response data
         return Unification.success(data);
     }
 

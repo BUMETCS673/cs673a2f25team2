@@ -1,25 +1,17 @@
-/**
- * Code Composition Ratio:
- * - AI Generated: 40%
- * - Manual Development: 60%
- * 
- * WebSocket configuration for different environments. The environment-specific
- * configuration logic was manually customized for deployment requirements.
- */
-// WebSocket 配置
+
 const config = {
-    // 开发环境
+    // Development environment
     development: {
         wsUrl: 'ws://localhost:8080/ws/chat'
     },
-    // 生产环境
+    // Production environment
     production: {
         wsUrl: 'ws://your-production-domain.com/ws/chat'
     }
 }
 
-// 获取当前环境
+// Get current environment
 const env = import.meta.env.MODE || 'development'
 
-// 导出当前环境的配置
+// Export configuration for current environment
 export default config[env] || config.development

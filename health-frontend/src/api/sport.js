@@ -9,7 +9,7 @@
 import request from './request'
 
 export default {
-  // 获取所有运动信息
+  // Get all sport information
   getAllSportInfo() {
     return request({
       url: '/sport/getAllSportInfo',
@@ -17,7 +17,7 @@ export default {
     })
   },
   
-  // 获取运动列表（分页）
+  // Get sport list (paginated)
   getSportList(params) {
     return request({
       url: '/sport/getSportList',
@@ -26,7 +26,7 @@ export default {
     })
   },
   
-  // 添加运动信息
+  // Add sport information
   addSport(data) {
     return request({
       url: '/sport/add',
@@ -35,7 +35,7 @@ export default {
     })
   },
   
-  // 更新运动信息
+  // Update sport information
   updateSport(data) {
     return request({
       url: '/sport/update',
@@ -44,7 +44,7 @@ export default {
     })
   },
   
-  // 根据ID获取运动信息
+  // Get sport information by ID
   getSportById(id) {
     return request({
       url: `/sport/${id}`,
@@ -52,7 +52,7 @@ export default {
     })
   },
   
-  // 删除运动信息
+  // Delete sport information
   deleteSport(id) {
     return request({
       url: `/sport/${id}`,

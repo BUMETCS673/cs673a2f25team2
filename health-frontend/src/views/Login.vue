@@ -14,50 +14,93 @@
           <h2>Health Management System</h2>
         </div>
       </template>
-      <el-form
-        :model="loginForm"
-        :rules="rules"
-        ref="loginFormRef"
-        label-width="0"
-      >
-        <el-form-item prop="username">
-          <el-input
-            v-model="loginForm.username"
-            placeholder="Please enter username"
-            size="large"
-            :prefix-icon="User"
-          />
-        </el-form-item>
-        <el-form-item prop="password">
-          <el-input
-            v-model="loginForm.password"
-            type="password"
-            placeholder="Please enter password"
-            size="large"
-            :prefix-icon="Lock"
-            @keyup.enter="handleLogin"
-            show-password
-          />
-        </el-form-item>
-        <el-form-item>
-          <el-button
-            type="primary"
-            @click="handleLogin"
-            :loading="loading"
-            size="large"
-            style="width: 100%"
+      <el-tabs v-model="activeTab" class="login-tabs">
+        <el-tab-pane label="User Login" name="user">
+          <el-form
+            :model="loginForm"
+            :rules="rules"
+            ref="loginFormRef"
+            label-width="0"
           >
-            Login
-          </el-button>
-        </el-form-item>
-        <el-form-item>
-          <div class="register-link">
-            <el-link type="primary" @click="$router.push('/register')">
-              No account? Register now
-            </el-link>
-          </div>
-        </el-form-item>
-      </el-form>
+            <el-form-item prop="username">
+              <el-input
+                v-model="loginForm.username"
+                placeholder="Please enter username"
+                size="large"
+                :prefix-icon="User"
+              />
+            </el-form-item>
+            <el-form-item prop="password">
+              <el-input
+                v-model="loginForm.password"
+                type="password"
+                placeholder="Please enter password"
+                size="large"
+                :prefix-icon="Lock"
+                @keyup.enter="handleLogin"
+                show-password
+              />
+            </el-form-item>
+            <el-form-item>
+              <el-button
+                type="primary"
+                @click="handleLogin"
+                :loading="loading"
+                size="large"
+                style="width: 100%"
+              >
+                Login
+              </el-button>
+            </el-form-item>
+            <el-form-item>
+              <div class="register-link">
+                <el-link type="primary" @click="$router.push('/register')">
+                  No account? Register now
+                </el-link>
+              </div>
+            </el-form-item>
+          </el-form>
+        </el-tab-pane>
+        <el-tab-pane label="Admin Login" name="admin">
+          <el-form
+            :model="adminLoginForm"
+            :rules="rules"
+            ref="adminLoginFormRef"
+            label-width="0"
+          >
+            <el-form-item prop="username">
+              <el-input
+                v-model="adminLoginForm.username"
+                placeholder="Please enter admin username"
+                size="large"
+                :prefix-icon="User"
+              />
+            </el-form-item>
+            <el-form-item prop="password">
+              <el-input
+                v-model="adminLoginForm.password"
+                type="password"
+                placeholder="Please enter admin password"
+                size="large"
+                :prefix-icon="Lock"
+                @keyup.enter="handleAdminLogin"
+                show-password
+              />
+            </el-form-item>
+            <el-form-item>
+              <el-button
+                type="primary"
+                @click="handleAdminLogin"
+                :loading="loading"
+                size="large"
+                style="width: 100%"
+              >
+                Admin Login
+              </el-button>
+            </el-form-item>
+          </el-form>
+        </el-tab-pane>
+      </el-tabs>
     </el-card>
   </div>
 </template>
@@ -71,9 +114,16 @@ import userApi from '../api/user'
 
 const router = useRouter()
 const loginFormRef = ref(null)
+const adminLoginFormRef = ref(null)
 const loading = ref(false)
+const activeTab = ref('user')
 
 const loginForm = reactive({
+  username: '',
+  password: ''
+})
+
+const adminLoginForm = reactive({
   username: '',
   password: ''
 })
@@ -92,10 +142,50 @@ const handleLogin = async () => {
         const data = await userApi.login(loginForm)
         localStorage.setItem('token', data.token)
         localStorage.setItem('userInfo', JSON.stringify(data))
+        
+        // Get user info to check role
+        const token = data.token
+        const userInfo = await userApi.getUserInfo(token)
+        localStorage.setItem('userInfo', JSON.stringify({ ...data, ...userInfo }))
+        
         ElMessage.success('Login successful')
         router.push('/dashboard')
       } catch (error) {
         ElMessage.error(error.message || 'Login failed')
+      } finally {
+        loading.value = false
+      }
+    }
+  })
+}
+
+const handleAdminLogin = async () => {
+  if (!adminLoginFormRef.value) return
+  await adminLoginFormRef.value.validate(async (valid) => {
+    if (valid) {
+      loading.value = true
+      try {
+        const data = await userApi.login(adminLoginForm)
+        localStorage.setItem('token', data.token)
+        
+        // Get user info to check role
+        const token = data.token
+        const userInfo = await userApi.getUserInfo(token)
+        
+        // Check if user is admin
+        const roles = userInfo.roles || []
+        if (!roles.includes('admin')) {
+          ElMessage.error('Access denied. Admin privileges required.')
+          localStorage.removeItem('token')
+          localStorage.removeItem('userInfo')
+          return
+        }
+        
+        localStorage.setItem('userInfo', JSON.stringify({ ...data, ...userInfo }))
+        ElMessage.success('Admin login successful')
+        router.push('/admin/dashboard')
+      } catch (error) {
+        ElMessage.error(error.message || 'Admin login failed')
       } finally {
         loading.value = false
       }
@@ -213,6 +303,28 @@ const handleLogin = async () => {
 
 .register-link :deep(.el-link) {
   font-size: 14px;
+}
+
+.login-tabs {
+  margin-top: 10px;
+}
+
+.login-tabs :deep(.el-tabs__header) {
+  margin-bottom: 20px;
+}
+
+.login-tabs :deep(.el-tabs__item) {
+  font-size: 16px;
+  font-weight: 500;
+  padding: 0 30px;
+}
+
+.login-tabs :deep(.el-tabs__active-bar) {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.login-tabs :deep(.el-tabs__item.is-active) {
+  color: #667eea;
 }
 </style>
 

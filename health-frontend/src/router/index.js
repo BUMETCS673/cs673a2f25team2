@@ -71,6 +71,20 @@ const routes = [
         meta: { title: 'Personal Center', icon: 'UserFilled' }
       }
     ]
+  },
+  {
+    path: '/admin',
+    component: () => import('../layouts/AdminLayout.vue'),
+    redirect: '/admin/dashboard',
+    meta: { requiresAuth: true, requiresAdmin: true },
+    children: [
+      {
+        path: 'dashboard',
+        name: 'AdminDashboard',
+        component: () => import('../views/AdminDashboard.vue'),
+        meta: { title: 'User Management', icon: 'Avatar' }
+      }
+    ]
   }
 ]
 
@@ -79,11 +93,25 @@ const router = createRouter({
   routes
 })
 
-// 路由守卫
+// Route guard
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('token')
   if (to.meta.requiresAuth && !token) {
     next('/login')
+  } else if (to.meta.requiresAdmin && token) {
+    // Check if user is admin
+    const userInfoStr = localStorage.getItem('userInfo')
+    if (userInfoStr) {
+      const userInfo = JSON.parse(userInfoStr)
+      const roles = userInfo.roles || []
+      if (!roles.includes('admin')) {
+        next('/login')
+      } else {
+        next()
+      }
+    } else {
+      next('/login')
+    }
   } else {
     next()
   }

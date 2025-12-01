@@ -226,7 +226,7 @@ const syncAllRecordsBasicInfo = async () => {
   
   if (!bodyInfo.value) return
   
-  // 获取所有记录
+  // Get all records
   try {
     const allData = await bodyApi.getUserBodyList({
       pageNo: 1,
@@ -241,7 +241,7 @@ const syncAllRecordsBasicInfo = async () => {
     
     let updateCount = 0
     for (const record of records) {
-      // 检查是否需要更新（比较基本信息）
+      // Check if update is needed (compare basic information)
       const needsUpdate = 
         record.name !== bodyInfo.value.name ||
         record.age !== bodyInfo.value.age ||
@@ -262,9 +262,9 @@ const syncAllRecordsBasicInfo = async () => {
             weight: bodyInfo.value.weight
           }
           
-          // 处理日期字段
+          // Handle date field
           if (updateData.Date) {
-            // 保持原有日期
+            // Keep original date
           } else if (updateData.date) {
             updateData.Date = new Date(updateData.date)
           }
@@ -272,18 +272,18 @@ const syncAllRecordsBasicInfo = async () => {
           await bodyApi.updateUserBody(updateData)
           updateCount++
         } catch (error) {
-          console.error(`更新记录 ${record.notesid} 失败:`, error)
+          console.error(`Failed to update record ${record.notesid}:`, error)
         }
       }
     }
     
     if (updateCount > 0) {
-      console.log(`已同步 ${updateCount} 条记录的基本信息`)
-      // 重新加载当前页数据
+      console.log(`Synchronized basic information of ${updateCount} records`)
+      // Reload current page data
       await loadData()
     }
   } catch (error) {
-    console.error('同步记录失败:', error)
+    console.error('Failed to synchronize records:', error)
   }
 }
 
@@ -293,7 +293,7 @@ const resetForm = () => {
   }
   editingId.value = null
   
-  // 重置时，如果是添加新记录，重新加载身体信息并同步
+  // When resetting, if adding a new record, reload body information and synchronize
   if (!editingId.value && bodyInfo.value) {
     form.name = bodyInfo.value.name || ''
     form.age = bodyInfo.value.age || null
@@ -302,7 +302,7 @@ const resetForm = () => {
     form.weight = bodyInfo.value.weight || null
   }
   
-  // 重置其他字段
+  // Reset other fields
   form.date = ''
   form.bloodSugar = null
   form.bloodPressure = ''
@@ -318,10 +318,10 @@ const resetForm = () => {
   form.waterConsumption = null
 }
 
-// 修改对话框打开时的处理
+// Handle when edit dialog opens
 const openDialog = async () => {
-  editingId.value = null  // 确保是添加模式
-  // 添加新记录时，加载并同步身体信息
+  editingId.value = null  // Ensure it's add mode
+  // When adding new record, load and synchronize body information
   await loadBodyInfo()
   showDialog.value = true
 }
@@ -329,16 +329,16 @@ const openDialog = async () => {
 const handleEdit = async (row) => {
   editingId.value = row.notesid
   try {
-    // 先加载身体信息
+    // First load body information
     await loadBodyInfo()
     
-    // 然后加载记录数据
+    // Then load record data
     const data = await bodyApi.getUserBodyById(row.notesid)
     
-    // 合并数据：记录的其他字段 + 身体信息的基本字段
+    // Merge data: other fields of record + basic fields of body information
     Object.assign(form, {
       ...data,
-      // 用身体信息覆盖基本信息（姓名、年龄、性别、身高、体重）
+      // Override basic information with body information (name, age, gender, height, weight)
       name: bodyInfo.value?.name || data.name || '',
       age: bodyInfo.value?.age ?? data.age ?? null,
       gender: bodyInfo.value?.gender || data.gender || '',
@@ -346,7 +346,7 @@ const handleEdit = async (row) => {
       weight: bodyInfo.value?.weight ?? data.weight ?? null
     })
     
-    // 处理日期格式
+    // Handle date format
     if (data.Date || data.date) {
       const dateValue = data.Date || data.date
       form.date = new Date(dateValue).toISOString().split('T')[0]
@@ -359,17 +359,17 @@ const handleEdit = async (row) => {
 }
 
 const handleDelete = async (row) => {
-  ElMessageBox.confirm('Confirm要Delete这条记录吗？', 'Prompt', {
+  ElMessageBox.confirm('Are you sure to delete this record?', 'Confirm', {
     confirmButtonText: 'Confirm',
-    cancelButtonText: '取消',
+    cancelButtonText: 'Cancel',
     type: 'warning'
   }).then(async () => {
     try {
       await bodyApi.deleteUserBody(row.notesid)
-      ElMessage.success('Delete成功')
+      ElMessage.success('Delete successful')
       loadData()
     } catch (error) {
-      ElMessage.error('Delete失败')
+      ElMessage.error('Delete failed')
     }
   })
 }
@@ -380,7 +380,7 @@ const handleSubmit = async () => {
     if (valid) {
       submitting.value = true
       try {
-        // 获取用户ID
+        // Get user ID
         const userIdData = await userApi.getUserId()
         if (!userIdData || !userIdData.id) {
           ElMessage.error('Unable to get user ID, please login again')
@@ -389,13 +389,13 @@ const handleSubmit = async () => {
         }
         
         if (editingId.value) {
-          // Edit模式
+          // Edit mode
           const updateData = { 
             ...form, 
             notesid: editingId.value,
-            id: userIdData.id  // 确保包含用户ID
+            id: userIdData.id  // Ensure user ID is included
           }
-          // 处理日期字段
+          // Handle date field
           if (updateData.date) {
             updateData.Date = new Date(updateData.date)
             delete updateData.date
@@ -403,9 +403,9 @@ const handleSubmit = async () => {
           await bodyApi.updateUserBody(updateData)
           ElMessage.success('Update successful')
         } else {
-          // 添加模式
+          // Add mode
           const submitData = {
-            id: userIdData.id,  // 必须设置用户ID
+            id: userIdData.id,  // Must set user ID
             name: form.name,
             age: form.age,
             gender: form.gender,
@@ -425,11 +425,11 @@ const handleSubmit = async () => {
             waterConsumption: form.waterConsumption || null
           }
           
-          // 处理日期字段 - BodyNotes使用Date（大写）
+          // Handle date field - BodyNotes uses Date (uppercase)
           if (form.date) {
             submitData.Date = new Date(form.date)
           } else {
-            submitData.Date = new Date()  // 如果没有提供日期，使用当前日期
+            submitData.Date = new Date()  // If no date provided, use current date
           }
           
           await bodyApi.addBodyNotes(submitData)
@@ -438,8 +438,8 @@ const handleSubmit = async () => {
         showDialog.value = false
         loadData()
       } catch (error) {
-        console.error('操作失败:', error)
-        ElMessage.error(error.message || '操作失败')
+        console.error('Operation failed:', error)
+        ElMessage.error(error.message || 'Operation failed')
       } finally {
         submitting.value = false
       }
@@ -447,9 +447,9 @@ const handleSubmit = async () => {
   })
 }
 
-// 监听路由激活，当从BodyInfo页面返回时同步数据
+// Listen for route activation, synchronize data when returning from BodyInfo page
 onActivated(() => {
-  // 检查是否有身体信息更新的标志
+  // Check if there is a body information update flag
   const bodyInfoUpdated = localStorage.getItem('bodyInfoUpdated')
   if (bodyInfoUpdated === 'true') {
     syncAllRecordsBasicInfo()
@@ -457,12 +457,12 @@ onActivated(() => {
   }
 })
 
-// 页面加载时也检查并同步
+// Also check and synchronize when page loads
 onMounted(async () => {
   loadData()
   await loadBodyInfo()
   
-  // 检查是否有身体信息更新的标志
+  // Check if there is a body information update flag
   const bodyInfoUpdated = localStorage.getItem('bodyInfoUpdated')
   if (bodyInfoUpdated === 'true') {
     syncAllRecordsBasicInfo()

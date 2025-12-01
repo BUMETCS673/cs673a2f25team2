@@ -16,7 +16,7 @@ const request = axios.create({
   timeout: 10000
 })
 
-// 请求拦截器
+// Request interceptor
 request.interceptors.request.use(
   config => {
     const token = localStorage.getItem('token')
@@ -30,7 +30,7 @@ request.interceptors.request.use(
   }
 )
 
-// 响应拦截器
+// Response interceptor
 request.interceptors.response.use(
   response => {
     const res = response.data
