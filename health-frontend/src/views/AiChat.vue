@@ -187,9 +187,10 @@ const initWebSocket = () => {
 let currentAiMessage = ''
 const handleMessage = (data) => {
   if (data.startsWith('data:')) {
-    const content = data.substring(5).trim()
+    const content = data.substring(5)
+    const normalized = content.trim()
 
-    if (content === '[DONE]') {
+    if (normalized === '[DONE]') {
       // Message reception complete
       if (currentAiMessage) {
         addMessage('ai', currentAiMessage)
