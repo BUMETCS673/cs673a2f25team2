@@ -137,11 +137,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         }
 
         if (loginUser != null) {
+            // Decrypt sensitive fields before returning to clients
+            decryptUserSensitiveData(loginUser);
+
             // If user information is obtained, assemble return data
             Map<String, Object> data = new HashMap<>();
             data.put("name", loginUser.getUsername());
+            data.put("username", loginUser.getUsername());
             data.put("avatar", loginUser.getAvatar());
             data.put("id", loginUser.getId());
+            data.put("email", loginUser.getEmail());
+            data.put("phone", loginUser.getPhone());
+            data.put("status", loginUser.getStatus());
             // Get user role list
             List<String> roleList = this.baseMapper.getRoleNameByUserId(loginUser.getId());
             data.put("roles", roleList);

@@ -96,29 +96,29 @@
               @keyup.enter="sendMessage"
               :disabled="loading || !isConnected"
               class="message-input"
-          >
-            <template #append>
-              <div class="append-actions">
-                <input
-                    ref="fileInputRef"
-                    type="file"
-                    accept=".txt,image/*"
-                    class="file-input"
-                    @change="handleFileChange"
-                >
-                <el-button
-                    :icon="Plus"
-                    @click="triggerFileSelect"
-                    :disabled="loading || !isConnected"
-                />
-                <el-button
-                    :icon="Promotion"
-                    @click="sendMessage"
-                    :disabled="!inputMessage.trim() || loading || !isConnected"
-                />
-              </div>
-            </template>
-          </el-input>
+          />
+          <div class="input-actions">
+            <input
+                ref="fileInputRef"
+                type="file"
+                accept=".txt,image/*"
+                class="file-input"
+                @change="handleFileChange"
+            >
+            <el-button
+                :icon="Plus"
+                circle
+                @click="triggerFileSelect"
+                :disabled="loading || !isConnected"
+            />
+            <el-button
+                type="primary"
+                :icon="Promotion"
+                circle
+                @click="sendMessage"
+                :disabled="!inputMessage.trim() || loading || !isConnected"
+            />
+          </div>
         </div>
 
         <!-- Connection status -->
@@ -712,14 +712,15 @@ onUnmounted(() => {
   flex: 1;
 }
 
-.append-actions {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
 .file-input {
   display: none;
+}
+
+.input-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: 4px;
 }
 
 .connection-status {
