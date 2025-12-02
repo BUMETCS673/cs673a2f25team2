@@ -13,12 +13,15 @@ import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 @Component
 public class ChatWebSocketHandler extends TextWebSocketHandler {
     private final wsOpenAiChatModel openAiChatModel;
     private final IBodyNotesService bodyNotesService;
+    private final Map<String, StringBuilder> sessionContext = new ConcurrentHashMap<>();
 
     // Constructor injection of HistoryService and wsOpenAiChatModel
     public ChatWebSocketHandler(wsOpenAiChatModel openAiChatModel, IBodyNotesService bodyNotesService) {
@@ -32,6 +35,12 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         String payload = message.getPayload(); // Receive message from client
         ChatRequest request = parseMessage(payload); // Define a method to parse JSON
         String question = request.getText();
+        String sessionKey = getSessionKey(session, request);
+
+        if ("upload_context".equalsIgnoreCase(request.getType())) {
+            handleUploadContext(session, sessionKey, request);
+            return;
+        }
 
         String username = request.getUsername();
         if (question.equals("AI Health Advice")) {
@@ -39,12 +48,14 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             question = constructPrompt(bodyNotes);
         }
 
+        String contextualQuestion = appendContext(question, sessionKey);
+
 
         // Initialize StringBuilder for accumulating responses
         StringBuilder responseBuilder = new StringBuilder();
 
         // Use Flux<String> to stream data back to client
-        Flux<String> aiResponse = openAiChatModel.stream(question)
+        Flux<String> aiResponse = openAiChatModel.stream(contextualQuestion)
                 .doOnNext(chunk -> {
                     if (!"[DONE]".equalsIgnoreCase(chunk)) {
                         responseBuilder.append(chunk); // Accumulate AI response content
@@ -77,6 +88,59 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             return mapper.readValue(payload, ChatRequest.class);
         } catch (Exception e) {
             throw new RuntimeException("Invalid message format: " + payload, e);
+        }
+    }
+
+    private String getSessionKey(WebSocketSession session, ChatRequest request) {
+        if (request.getSessionId() != null && !request.getSessionId().isEmpty()) {
+            return request.getSessionId();
+        }
+        return session.getId();
+    }
+
+    private void handleUploadContext(WebSocketSession session, String sessionKey, ChatRequest request) {
+        StringBuilder builder = sessionContext.computeIfAbsent(sessionKey, key -> new StringBuilder());
+
+        String fileLabel = request.getFileName() != null ? request.getFileName() : "Uploaded file";
+        String fileType = request.getFileType() != null ? request.getFileType() : "text/plain";
+        String content = request.getFileContent() != null ? request.getFileContent() : "";
+
+        String normalizedContent = normalizeContent(content, fileType);
+        builder.append("File: ").append(fileLabel).append(" (type: ").append(fileType).append(")\n")
+                .append(normalizedContent)
+                .append("\n\n");
+
+        streamSingleMessage(session, "Context uploaded and will be used to enhance subsequent answers.");
+    }
+
+    private String normalizeContent(String content, String fileType) {
+        if (fileType.startsWith("image/")) {
+            String prefix = content.length() > 150 ? content.substring(0, 150) + "..." : content;
+            return "Image (base64 preview): " + prefix;
+        }
+        if (content.length() > 4000) {
+            return content.substring(0, 4000) + "...";
+        }
+        return content;
+    }
+
+    private String appendContext(String question, String sessionKey) {
+        StringBuilder context = sessionContext.get(sessionKey);
+        if (context == null || context.length() == 0) {
+            return question;
+        }
+
+        return "Use the following user-provided documents as additional context when answering." +
+                "\nContext:\n" + context +
+                "\nUser question: " + question;
+    }
+
+    private void streamSingleMessage(WebSocketSession session, String message) {
+        try {
+            session.sendMessage(new TextMessage("data:" + message + "\n\n"));
+            session.sendMessage(new TextMessage("data:[DONE]\n\n"));
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

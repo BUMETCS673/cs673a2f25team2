@@ -98,11 +98,25 @@
               class="message-input"
           >
             <template #append>
-              <el-button
-                  :icon="Promotion"
-                  @click="sendMessage"
-                  :disabled="!inputMessage.trim() || loading || !isConnected"
-              />
+              <div class="append-actions">
+                <input
+                    ref="fileInputRef"
+                    type="file"
+                    accept=".txt,image/*"
+                    class="file-input"
+                    @change="handleFileChange"
+                >
+                <el-button
+                    :icon="Plus"
+                    @click="triggerFileSelect"
+                    :disabled="loading || !isConnected"
+                />
+                <el-button
+                    :icon="Promotion"
+                    @click="sendMessage"
+                    :disabled="!inputMessage.trim() || loading || !isConnected"
+                />
+              </div>
             </template>
           </el-input>
         </div>
@@ -132,7 +146,8 @@ import {
   Cpu,
   Promotion,
   CircleCheck,
-  CircleClose
+  CircleClose,
+  Plus
 } from '@element-plus/icons-vue'
 import wsConfig from '../config/websocket'
 
@@ -145,6 +160,7 @@ const activeSessionId = ref('')
 const messages = ref([])
 const inputMessage = ref('')
 const messageListRef = ref(null)
+const fileInputRef = ref(null)
 
 // Current user info
 const userInfo = ref(null)
@@ -292,11 +308,12 @@ const sendMessage = () => {
   updateSessionTitle(message)
 
   // Send to backend
-  const chatRequest = {
-    type: 'chat',
-    text: message,
-    username: userInfo.value?.username || 'guest'
-  }
+    const chatRequest = {
+      type: 'chat',
+      text: message,
+      username: userInfo.value?.username || 'guest',
+      sessionId: activeSessionId.value
+    }
 
   ws.send(JSON.stringify(chatRequest))
 
@@ -316,14 +333,82 @@ const sendHealthAdviceRequest = () => {
   updateSessionTitle('Health Advice')
 
   // Send special request to backend
-  const chatRequest = {
-    type: 'health_advice',
-    text: 'AI Health Advice',
-    username: userInfo.value?.username || 'guest'
-  }
+    const chatRequest = {
+      type: 'health_advice',
+      text: 'AI Health Advice',
+      username: userInfo.value?.username || 'guest',
+      sessionId: activeSessionId.value
+    }
 
   ws.send(JSON.stringify(chatRequest))
 
+  loading.value = true
+}
+
+const triggerFileSelect = () => {
+  if (!isConnected.value) {
+    ElMessage.warning('Please connect before uploading context files')
+    return
+  }
+
+  if (fileInputRef.value) {
+    fileInputRef.value.value = ''
+    fileInputRef.value.click()
+  }
+}
+
+const handleFileChange = (event) => {
+  const file = event.target.files?.[0]
+  if (!file) {
+    return
+  }
+
+  const isImage = file.type.startsWith('image/')
+  const isText = file.type === 'text/plain' || file.name.toLowerCase().endsWith('.txt')
+
+  if (!isImage && !isText) {
+    ElMessage.error('Please upload a txt document or an image file')
+    event.target.value = ''
+    return
+  }
+
+  const reader = new FileReader()
+  reader.onload = () => {
+    const content = reader.result
+    if (typeof content === 'string') {
+      sendContextFile(file, content)
+    }
+    event.target.value = ''
+  }
+
+  if (isImage) {
+    reader.readAsDataURL(file)
+  } else {
+    reader.readAsText(file)
+  }
+}
+
+const sendContextFile = (file, content) => {
+  if (!isConnected.value || loading.value) {
+    ElMessage.warning('Please wait for the current response to finish before uploading')
+    return
+  }
+
+  const descriptor = file.name || 'Uploaded file'
+  addMessage('user', `Uploaded context: ${descriptor}`)
+  updateSessionTitle(descriptor)
+
+  const chatRequest = {
+    type: 'upload_context',
+    text: 'Context upload',
+    username: userInfo.value?.username || 'guest',
+    sessionId: activeSessionId.value,
+    fileName: descriptor,
+    fileType: file.type || 'text/plain',
+    fileContent: content
+  }
+
+  ws.send(JSON.stringify(chatRequest))
   loading.value = true
 }
 
@@ -625,6 +710,16 @@ onUnmounted(() => {
 
 .message-input {
   flex: 1;
+}
+
+.append-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.file-input {
+  display: none;
 }
 
 .connection-status {

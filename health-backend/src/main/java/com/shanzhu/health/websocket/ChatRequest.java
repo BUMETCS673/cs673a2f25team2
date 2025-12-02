@@ -9,4 +9,8 @@ public class ChatRequest {
     private String msg;
     private String userId;
     private String username;
+    private String sessionId;
+    private String fileName;
+    private String fileType;
+    private String fileContent;
 }
