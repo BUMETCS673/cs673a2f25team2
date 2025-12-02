@@ -76,6 +76,14 @@
                 {{ userInfo?.status === 1 ? 'Enabled' : 'Disabled' }}
               </el-tag>
             </el-descriptions-item>
+            <el-descriptions-item label="Payment Status">
+              <el-tag :type="paymentStatusTagType(userInfo?.paymentStatus)">
+                {{ formatPaymentStatus(userInfo?.paymentStatus) }}
+              </el-tag>
+            </el-descriptions-item>
+            <el-descriptions-item label="Access Expiry">
+              {{ formatAccessExpiry(userInfo?.accessExpiry) }}
+            </el-descriptions-item>
           </el-descriptions>
         </el-card>
       </el-col>
@@ -116,6 +124,31 @@ const passwordRules = {
     { required: true, message: 'Please confirm new password', trigger: 'blur' },
     { validator: validateConfirmPassword, trigger: 'blur' }
   ]
+}
+
+const formatPaymentStatus = (status) => {
+  if (!status) return 'Unpaid'
+  const upper = status.toUpperCase()
+  if (upper === 'ACTIVE') return 'Active'
+  if (upper === 'EXPIRED') return 'Expired'
+  return 'Unpaid'
+}
+
+const paymentStatusTagType = (status) => {
+  if (!status) return 'danger'
+  const upper = status.toUpperCase()
+  if (upper === 'ACTIVE') return 'success'
+  if (upper === 'EXPIRED') return 'warning'
+  return 'danger'
+}
+
+const formatAccessExpiry = (expiry) => {
+  if (!expiry) return 'Not set'
+  try {
+    return new Date(expiry).toLocaleString()
+  } catch (e) {
+    return expiry
+  }
 }
 
 const loadUserInfo = async () => {
