@@ -8,6 +8,7 @@ import com.shanzhu.health.entity.Body;
 import com.shanzhu.health.entity.BodyNotes;
 import com.shanzhu.health.entity.SportInfo;
 import com.shanzhu.health.entity.User;
+import com.shanzhu.health.dto.PurchaseRequest;
 import com.shanzhu.health.service.IBodyNotesService;
 import com.shanzhu.health.service.IBodyService;
 import com.shanzhu.health.service.IUserService;
@@ -86,6 +87,16 @@ public class UserController {
     public Unification<?> logout(@RequestHeader("X-Token") String token) {
         userService.logout(token);// Logout current user's login status from the system
         return Unification.success();
+    }
+
+    @PostMapping("/purchase")
+    public Unification<Map<String, Object>> completePurchase(@RequestHeader("X-Token") String token,
+                                                             @RequestBody PurchaseRequest purchaseRequest) {
+        Map<String, Object> data = userService.completePurchase(token, purchaseRequest.getPlanType(), purchaseRequest.getPaymentMethod());
+        if (data != null) {
+            return Unification.success(data, "Payment successful");
+        }
+        return Unification.fail(20005, "Payment failed or user not authenticated");
     }
 
 

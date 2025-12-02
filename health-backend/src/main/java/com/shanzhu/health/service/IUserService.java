@@ -33,4 +33,6 @@ public interface IUserService extends IService<User> {
     Map<String, Object> Wxlogin(User user);
 
     Map<String, Object> WxgetUserId(String token);
+
+    Map<String, Object> completePurchase(String token, String planType, String paymentMethod);
 }

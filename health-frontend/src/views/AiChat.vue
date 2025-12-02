@@ -9,11 +9,43 @@
 -->
 <template>
   <div class="ai-chat-container">
+    <div class="session-panel">
+      <div class="session-header">
+        <div class="session-title">
+          <el-icon><ChatDotRound /></el-icon>
+          <span>Chat History</span>
+        </div>
+        <el-button type="primary" size="small" @click="createNewSession">
+          New Chat
+        </el-button>
+      </div>
+      <el-scrollbar class="session-list">
+        <div
+            v-for="session in sessions"
+            :key="session.id"
+            :class="['session-item', { active: session.id === activeSessionId }]"
+            @click="switchSession(session.id)"
+        >
+          <div class="session-item-header">
+            <span class="session-name">{{ session.title }}</span>
+            <el-tag size="small" type="info">{{ session.messages.length }} msgs</el-tag>
+          </div>
+          <div class="session-time">{{ formatSessionTime(session.createdAt) }}</div>
+        </div>
+      </el-scrollbar>
+    </div>
+
     <el-card class="chat-card">
       <template #header>
         <div class="chat-header">
           <el-icon><ChatDotRound /></el-icon>
-          <span>AI Health Assistant</span>
+          <span>{{ currentSessionTitle }}</span>
+          <el-tag :type="hasAccess ? 'success' : 'danger'" size="small" class="access-tag">
+            {{ accessBadgeText }}
+          </el-tag>
+          <el-button v-if="!hasAccess" size="small" type="primary" @click="openPlanDialog">
+            Purchase access
+          </el-button>
         </div>
       </template>
 
@@ -22,7 +54,7 @@
         <div class="message-list" ref="messageListRef">
           <div
               v-for="(message, index) in messages"
-              :key="index"
+              :key="`${activeSessionId}-${index}`"
               :class="['message-item', message.type]"
           >
             <div class="message-avatar">
@@ -59,7 +91,7 @@
           <el-button
               type="primary"
               @click="sendHealthAdviceRequest"
-              :disabled="loading || !isConnected"
+              :disabled="loading || !isConnected || !hasAccess"
               class="health-advice-btn"
           >
             Get Health Advice
@@ -68,17 +100,31 @@
               v-model="inputMessage"
               placeholder="Enter your health question..."
               @keyup.enter="sendMessage"
-              :disabled="loading || !isConnected"
+              :disabled="loading || !isConnected || !hasAccess"
               class="message-input"
-          >
-            <template #append>
-              <el-button
-                  :icon="Promotion"
-                  @click="sendMessage"
-                  :disabled="!inputMessage.trim() || loading || !isConnected"
-              />
-            </template>
-          </el-input>
+          />
+          <div class="input-actions">
+            <input
+                ref="fileInputRef"
+                type="file"
+                accept=".txt,image/*"
+                class="file-input"
+                @change="handleFileChange"
+            >
+            <el-button
+                :icon="Plus"
+                circle
+                @click="triggerFileSelect"
+                :disabled="loading || !isConnected || !hasAccess"
+            />
+            <el-button
+                type="primary"
+                :icon="Promotion"
+                circle
+                @click="sendMessage"
+                :disabled="!inputMessage.trim() || loading || !isConnected || !hasAccess"
+            />
+          </div>
         </div>
 
         <!-- Connection status -->
@@ -94,11 +140,46 @@
         </div>
       </div>
     </el-card>
+
+    <el-dialog
+        v-model="paywallVisible"
+        title="AI Chatbox is a premium feature"
+        width="420px"
+        align-center
+    >
+      <p class="paywall-text">
+        You need an active subscription to chat with the AI assistant. Choose a plan to unlock access.
+      </p>
+      <div class="dialog-actions">
+        <el-button type="primary" @click="openPlanDialog">Go to purchase</el-button>
+      </div>
+    </el-dialog>
+
+    <el-dialog
+        v-model="planDialogVisible"
+        title="Choose your AI Chatbox plan"
+        width="560px"
+        align-center
+    >
+      <div class="plan-grid">
+        <div v-for="plan in plans" :key="plan.key" class="plan-card">
+          <div class="plan-card-header">
+            <div class="plan-name">{{ plan.title }}</div>
+            <div class="plan-price">${{ plan.price }}</div>
+          </div>
+          <div class="plan-duration">{{ plan.duration }}</div>
+          <el-button type="primary" class="plan-button" @click="goToPurchase(plan.key)">
+            Purchase
+          </el-button>
+        </div>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, nextTick } from 'vue'
+import { computed, onMounted, onUnmounted, nextTick, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import {
   ChatDotRound,
@@ -106,20 +187,49 @@ import {
   Cpu,
   Promotion,
   CircleCheck,
-  CircleClose
+  CircleClose,
+  Plus
 } from '@element-plus/icons-vue'
 import wsConfig from '../config/websocket'
+import userApi from '../api/user'
 
 // WebSocket connection
 let ws = null
 const isConnected = ref(false)
 const loading = ref(false)
+const sessions = ref([])
+const activeSessionId = ref('')
 const messages = ref([])
 const inputMessage = ref('')
 const messageListRef = ref(null)
+const fileInputRef = ref(null)
 
 // Current user info
 const userInfo = ref(null)
+const paywallVisible = ref(false)
+const planDialogVisible = ref(false)
+const router = useRouter()
+
+const plans = [
+  { key: 'single', title: 'One-time access', price: 1.99, duration: 'Single chat session' },
+  { key: 'weekly', title: 'Weekly access', price: 5.99, duration: '7 days unlimited chats' },
+  { key: 'monthly', title: 'Monthly access', price: 9.99, duration: '30 days unlimited chats' }
+]
+
+const hasAccess = computed(() => {
+  if (!userInfo.value) return false
+  const status = (userInfo.value.paymentStatus || '').toUpperCase()
+  const expiry = userInfo.value.accessExpiry ? new Date(userInfo.value.accessExpiry) : null
+  return status === 'ACTIVE' && expiry && expiry.getTime() > Date.now()
+})
+
+const accessBadgeText = computed(() => {
+  if (hasAccess.value && userInfo.value?.accessExpiry) {
+    const expiry = new Date(userInfo.value.accessExpiry)
+    return `Active until ${expiry.toLocaleString()}`
+  }
+  return 'No subscription'
+})
 
 // Initialize WebSocket connection
 const initWebSocket = () => {
@@ -159,9 +269,10 @@ const initWebSocket = () => {
 let currentAiMessage = ''
 const handleMessage = (data) => {
   if (data.startsWith('data:')) {
-    const content = data.substring(5).trim()
+    const content = data.substring(5).replace(/[\r\n]+$/g, '')
+    const normalized = content.trim()
 
-    if (content === '[DONE]') {
+    if (normalized === '[DONE]') {
       // Message reception complete
       if (currentAiMessage) {
         addMessage('ai', currentAiMessage)
@@ -175,9 +286,129 @@ const handleMessage = (data) => {
   }
 }
 
+const refreshUserProfile = async () => {
+  const token = localStorage.getItem('token')
+  if (!token) {
+    paywallVisible.value = true
+    return
+  }
+
+  try {
+    const freshUserInfo = await userApi.getUserInfo(token)
+    const stored = localStorage.getItem('userInfo')
+    const merged = { ...(stored ? JSON.parse(stored) : {}), ...freshUserInfo }
+    userInfo.value = merged
+    localStorage.setItem('userInfo', JSON.stringify(merged))
+    if (!hasAccess.value) {
+      paywallVisible.value = true
+    }
+  } catch (error) {
+    console.error('Failed to refresh user info', error)
+    paywallVisible.value = true
+  }
+}
+
+const requireAccess = () => {
+  if (!hasAccess.value) {
+    ElMessage.warning('Please purchase access to use the AI Chatbox')
+    paywallVisible.value = true
+    return false
+  }
+  return true
+}
+
+const openPlanDialog = () => {
+  planDialogVisible.value = true
+}
+
+const goToPurchase = (planKey) => {
+  planDialogVisible.value = false
+  paywallVisible.value = false
+  router.push({ path: '/purchase', query: { plan: planKey } })
+}
+
+const saveSessions = () => {
+  localStorage.setItem('aiChatSessions', JSON.stringify(sessions.value))
+}
+
+const getCurrentSession = () => sessions.value.find((session) => session.id === activeSessionId.value)
+
+const ensureActiveSession = () => {
+  if (!activeSessionId.value || !getCurrentSession()) {
+    createNewSession()
+  }
+}
+
+const createNewSession = () => {
+  const newSession = {
+    id: `session-${Date.now()}`,
+    title: 'New Chat',
+    createdAt: new Date().toISOString(),
+    messages: []
+  }
+
+  sessions.value.unshift(newSession)
+  activeSessionId.value = newSession.id
+  messages.value = newSession.messages
+  saveSessions()
+
+  addWelcomeMessage()
+}
+
+const switchSession = (sessionId) => {
+  if (sessionId === activeSessionId.value) {
+    return
+  }
+
+  const session = sessions.value.find((item) => item.id === sessionId)
+  if (session) {
+    activeSessionId.value = session.id
+    messages.value = session.messages
+    nextTick(() => scrollToBottom())
+  }
+}
+
+const loadSessions = () => {
+  const storedSessions = localStorage.getItem('aiChatSessions')
+  if (storedSessions) {
+    try {
+      const parsed = JSON.parse(storedSessions) || []
+      sessions.value = parsed.map((session) => ({
+        id: session.id || `session-${Date.now()}`,
+        title: session.title || 'New Chat',
+        createdAt: session.createdAt || new Date().toISOString(),
+        messages: session.messages || []
+      }))
+    } catch (error) {
+      sessions.value = []
+      console.error('Failed to parse stored sessions', error)
+    }
+  }
+
+  if (sessions.value.length > 0) {
+    activeSessionId.value = sessions.value[0].id
+    messages.value = sessions.value[0].messages || []
+  } else {
+    createNewSession()
+  }
+}
+
+const updateSessionTitle = (text) => {
+  const session = getCurrentSession()
+  if (session && (!session.title || session.title === 'New Chat')) {
+    const trimmed = text.trim()
+    session.title = trimmed.length > 30 ? `${trimmed.slice(0, 30)}...` : trimmed || 'New Chat'
+    saveSessions()
+  }
+}
+
 // Send message
 const sendMessage = () => {
   if (!inputMessage.value.trim() || !isConnected.value || loading.value) {
+    return
+  }
+
+  if (!requireAccess()) {
     return
   }
 
@@ -185,13 +416,15 @@ const sendMessage = () => {
 
   // Add user message to interface
   addMessage('user', message)
+  updateSessionTitle(message)
 
   // Send to backend
-  const chatRequest = {
-    type: 'chat',
-    text: message,
-    username: userInfo.value?.username || 'guest'
-  }
+    const chatRequest = {
+      type: 'chat',
+      text: message,
+      username: userInfo.value?.username || 'guest',
+      sessionId: activeSessionId.value
+    }
 
   ws.send(JSON.stringify(chatRequest))
 
@@ -206,28 +439,113 @@ const sendHealthAdviceRequest = () => {
     return
   }
 
+  if (!requireAccess()) {
+    return
+  }
+
   // Add user request to interface
   addMessage('user', 'Get Health Advice')
+  updateSessionTitle('Health Advice')
 
   // Send special request to backend
-  const chatRequest = {
-    type: 'health_advice',
-    text: 'AI Health Advice',
-    username: userInfo.value?.username || 'guest'
-  }
+    const chatRequest = {
+      type: 'health_advice',
+      text: 'AI Health Advice',
+      username: userInfo.value?.username || 'guest',
+      sessionId: activeSessionId.value
+    }
 
   ws.send(JSON.stringify(chatRequest))
 
   loading.value = true
 }
 
+const triggerFileSelect = () => {
+  if (!isConnected.value) {
+    ElMessage.warning('Please connect before uploading context files')
+    return
+  }
+
+  if (!requireAccess()) {
+    return
+  }
+
+  if (fileInputRef.value) {
+    fileInputRef.value.value = ''
+    fileInputRef.value.click()
+  }
+}
+
+const handleFileChange = (event) => {
+  const file = event.target.files?.[0]
+  if (!file) {
+    return
+  }
+
+  const isImage = file.type.startsWith('image/')
+  const isText = file.type === 'text/plain' || file.name.toLowerCase().endsWith('.txt')
+
+  if (!isImage && !isText) {
+    ElMessage.error('Please upload a txt document or an image file')
+    event.target.value = ''
+    return
+  }
+
+  const reader = new FileReader()
+  reader.onload = () => {
+    const content = reader.result
+    if (typeof content === 'string') {
+      sendContextFile(file, content)
+    }
+    event.target.value = ''
+  }
+
+  if (isImage) {
+    reader.readAsDataURL(file)
+  } else {
+    reader.readAsText(file)
+  }
+}
+
+const sendContextFile = (file, content) => {
+  if (!isConnected.value || loading.value) {
+    ElMessage.warning('Please wait for the current response to finish before uploading')
+    return
+  }
+
+  if (!requireAccess()) {
+    return
+  }
+
+  const descriptor = file.name || 'Uploaded file'
+  addMessage('user', `Uploaded context: ${descriptor}`)
+  updateSessionTitle(descriptor)
+
+  const chatRequest = {
+    type: 'upload_context',
+    text: 'Context upload',
+    username: userInfo.value?.username || 'guest',
+    sessionId: activeSessionId.value,
+    fileName: descriptor,
+    fileType: file.type || 'text/plain',
+    fileContent: content
+  }
+
+  ws.send(JSON.stringify(chatRequest))
+  loading.value = true
+}
+
 // Add message to list
 const addMessage = (type, text) => {
+  ensureActiveSession()
+
   messages.value.push({
     type,
     text,
     time: getCurrentTime()
   })
+
+  saveSessions()
 
   // Scroll to bottom
   nextTick(() => {
@@ -237,11 +555,23 @@ const addMessage = (type, text) => {
 
 // Add system message
 const addSystemMessage = (text) => {
+  ensureActiveSession()
+
   messages.value.push({
     type: 'system',
     text,
     time: getCurrentTime()
   })
+
+  saveSessions()
+}
+
+// Add welcome message if session is empty
+const addWelcomeMessage = () => {
+  const session = getCurrentSession()
+  if (session && session.messages.length === 0) {
+    addMessage('ai', 'Hello! I am your AI Health Assistant. You can ask me health questions, or click the "Get Health Advice" button to receive personalized advice based on your health data.')
+  }
 }
 
 // Get current time
@@ -250,12 +580,22 @@ const getCurrentTime = () => {
   return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`
 }
 
+const formatSessionTime = (time) => {
+  if (!time) return ''
+  const date = new Date(time)
+  return Number.isNaN(date.getTime())
+    ? ''
+    : date.toLocaleString([], { hour: '2-digit', minute: '2-digit', month: 'short', day: 'numeric' })
+}
+
 // Scroll to bottom
 const scrollToBottom = () => {
   if (messageListRef.value) {
     messageListRef.value.scrollTop = messageListRef.value.scrollHeight
   }
 }
+
+const currentSessionTitle = computed(() => getCurrentSession()?.title || 'AI Health Assistant')
 
 // Close WebSocket connection
 const closeWebSocket = () => {
@@ -273,11 +613,12 @@ onMounted(() => {
     userInfo.value = JSON.parse(userInfoStr)
   }
 
+  refreshUserProfile()
+
+  loadSessions()
+
   // Initialize WebSocket
   initWebSocket()
-
-  // Add welcome message
-  addMessage('ai', 'Hello! I am your AI Health Assistant. You can ask me health questions, or click the "Get Health Advice" button to receive personalized advice based on your health data.')
 })
 
 onUnmounted(() => {
@@ -289,8 +630,75 @@ onUnmounted(() => {
 .ai-chat-container {
   padding: 20px;
   height: calc(100vh - 120px);
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 16px;
+}
+
+.session-panel {
+  background: white;
+  border: 1px solid #ebeef5;
+  border-radius: 8px;
   display: flex;
   flex-direction: column;
+  min-height: 0;
+}
+
+.session-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid #ebeef5;
+}
+
+.session-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.access-tag {
+  margin-left: 10px;
+}
+
+.session-list {
+  flex: 1;
+  padding: 8px 0;
+}
+
+.session-item {
+  padding: 10px 16px;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.session-item:hover {
+  background: #f5f7fa;
+}
+
+.session-item.active {
+  background: #ecf5ff;
+  border-color: #409eff;
+}
+
+.session-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.session-name {
+  font-weight: 600;
+  color: #303133;
+}
+
+.session-time {
+  font-size: 12px;
+  color: #909399;
 }
 
 .chat-card {
@@ -433,11 +841,58 @@ onUnmounted(() => {
   flex: 1;
 }
 
+.file-input {
+  display: none;
+}
+
+.input-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: 4px;
+}
+
 .connection-status {
   position: absolute;
   top: 10px;
   right: 10px;
   z-index: 10;
+}
+
+.paywall-text {
+  color: #606266;
+  line-height: 1.6;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+.plan-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.plan-card {
+  border: 1px solid #ebeef5;
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.plan-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.plan-button {
+  width: 100%;
 }
 
 /* Typing indicator */

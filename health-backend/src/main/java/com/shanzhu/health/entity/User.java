@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -27,6 +28,8 @@ public class User implements Serializable {
     private Integer status;
     private String avatar;
     private Integer deleted;
+    private String paymentStatus;
+    private LocalDateTime accessExpiry;
 
     @TableField(exist = false)
     private List<Integer> roleIdList;

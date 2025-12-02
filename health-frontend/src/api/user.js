@@ -95,7 +95,7 @@ export default {
       data
     })
   },
-  
+
   // Get user ID
   getUserId() {
     return request({
@@ -109,6 +109,15 @@ export default {
     return request({
       url: '/user/getBodyNotesCount',
       method: 'get'
+    })
+  },
+
+  // Complete purchase and activate AI chat access
+  completePurchase(data) {
+    return request({
+      url: '/user/purchase',
+      method: 'post',
+      data
     })
   }
 }
