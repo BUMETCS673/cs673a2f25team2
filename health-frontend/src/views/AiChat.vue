@@ -9,11 +9,37 @@
 -->
 <template>
   <div class="ai-chat-container">
+    <div class="session-panel">
+      <div class="session-header">
+        <div class="session-title">
+          <el-icon><ChatDotRound /></el-icon>
+          <span>Chat History</span>
+        </div>
+        <el-button type="primary" size="small" @click="createNewSession">
+          New Chat
+        </el-button>
+      </div>
+      <el-scrollbar class="session-list">
+        <div
+            v-for="session in sessions"
+            :key="session.id"
+            :class="['session-item', { active: session.id === activeSessionId }]"
+            @click="switchSession(session.id)"
+        >
+          <div class="session-item-header">
+            <span class="session-name">{{ session.title }}</span>
+            <el-tag size="small" type="info">{{ session.messages.length }} msgs</el-tag>
+          </div>
+          <div class="session-time">{{ formatSessionTime(session.createdAt) }}</div>
+        </div>
+      </el-scrollbar>
+    </div>
+
     <el-card class="chat-card">
       <template #header>
         <div class="chat-header">
           <el-icon><ChatDotRound /></el-icon>
-          <span>AI Health Assistant</span>
+          <span>{{ currentSessionTitle }}</span>
         </div>
       </template>
 
@@ -22,7 +48,7 @@
         <div class="message-list" ref="messageListRef">
           <div
               v-for="(message, index) in messages"
-              :key="index"
+              :key="`${activeSessionId}-${index}`"
               :class="['message-item', message.type]"
           >
             <div class="message-avatar">
@@ -98,7 +124,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, nextTick } from 'vue'
+import { computed, onMounted, onUnmounted, nextTick, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import {
   ChatDotRound,
@@ -114,6 +140,8 @@ import wsConfig from '../config/websocket'
 let ws = null
 const isConnected = ref(false)
 const loading = ref(false)
+const sessions = ref([])
+const activeSessionId = ref('')
 const messages = ref([])
 const inputMessage = ref('')
 const messageListRef = ref(null)
@@ -175,6 +203,81 @@ const handleMessage = (data) => {
   }
 }
 
+const saveSessions = () => {
+  localStorage.setItem('aiChatSessions', JSON.stringify(sessions.value))
+}
+
+const getCurrentSession = () => sessions.value.find((session) => session.id === activeSessionId.value)
+
+const ensureActiveSession = () => {
+  if (!activeSessionId.value || !getCurrentSession()) {
+    createNewSession()
+  }
+}
+
+const createNewSession = () => {
+  const newSession = {
+    id: `session-${Date.now()}`,
+    title: 'New Chat',
+    createdAt: new Date().toISOString(),
+    messages: []
+  }
+
+  sessions.value.unshift(newSession)
+  activeSessionId.value = newSession.id
+  messages.value = newSession.messages
+  saveSessions()
+
+  addWelcomeMessage()
+}
+
+const switchSession = (sessionId) => {
+  if (sessionId === activeSessionId.value) {
+    return
+  }
+
+  const session = sessions.value.find((item) => item.id === sessionId)
+  if (session) {
+    activeSessionId.value = session.id
+    messages.value = session.messages
+    nextTick(() => scrollToBottom())
+  }
+}
+
+const loadSessions = () => {
+  const storedSessions = localStorage.getItem('aiChatSessions')
+  if (storedSessions) {
+    try {
+      const parsed = JSON.parse(storedSessions) || []
+      sessions.value = parsed.map((session) => ({
+        id: session.id || `session-${Date.now()}`,
+        title: session.title || 'New Chat',
+        createdAt: session.createdAt || new Date().toISOString(),
+        messages: session.messages || []
+      }))
+    } catch (error) {
+      sessions.value = []
+      console.error('Failed to parse stored sessions', error)
+    }
+  }
+
+  if (sessions.value.length > 0) {
+    activeSessionId.value = sessions.value[0].id
+    messages.value = sessions.value[0].messages || []
+  } else {
+    createNewSession()
+  }
+}
+
+const updateSessionTitle = (text) => {
+  const session = getCurrentSession()
+  if (session && (!session.title || session.title === 'New Chat')) {
+    const trimmed = text.trim()
+    session.title = trimmed.length > 30 ? `${trimmed.slice(0, 30)}...` : trimmed || 'New Chat'
+    saveSessions()
+  }
+}
+
 // Send message
 const sendMessage = () => {
   if (!inputMessage.value.trim() || !isConnected.value || loading.value) {
@@ -185,6 +288,7 @@ const sendMessage = () => {
 
   // Add user message to interface
   addMessage('user', message)
+  updateSessionTitle(message)
 
   // Send to backend
   const chatRequest = {
@@ -208,6 +312,7 @@ const sendHealthAdviceRequest = () => {
 
   // Add user request to interface
   addMessage('user', 'Get Health Advice')
+  updateSessionTitle('Health Advice')
 
   // Send special request to backend
   const chatRequest = {
@@ -223,11 +328,15 @@ const sendHealthAdviceRequest = () => {
 
 // Add message to list
 const addMessage = (type, text) => {
+  ensureActiveSession()
+
   messages.value.push({
     type,
     text,
     time: getCurrentTime()
   })
+
+  saveSessions()
 
   // Scroll to bottom
   nextTick(() => {
@@ -237,11 +346,23 @@ const addMessage = (type, text) => {
 
 // Add system message
 const addSystemMessage = (text) => {
+  ensureActiveSession()
+
   messages.value.push({
     type: 'system',
     text,
     time: getCurrentTime()
   })
+
+  saveSessions()
+}
+
+// Add welcome message if session is empty
+const addWelcomeMessage = () => {
+  const session = getCurrentSession()
+  if (session && session.messages.length === 0) {
+    addMessage('ai', 'Hello! I am your AI Health Assistant. You can ask me health questions, or click the "Get Health Advice" button to receive personalized advice based on your health data.')
+  }
 }
 
 // Get current time
@@ -250,12 +371,22 @@ const getCurrentTime = () => {
   return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`
 }
 
+const formatSessionTime = (time) => {
+  if (!time) return ''
+  const date = new Date(time)
+  return Number.isNaN(date.getTime())
+    ? ''
+    : date.toLocaleString([], { hour: '2-digit', minute: '2-digit', month: 'short', day: 'numeric' })
+}
+
 // Scroll to bottom
 const scrollToBottom = () => {
   if (messageListRef.value) {
     messageListRef.value.scrollTop = messageListRef.value.scrollHeight
   }
 }
+
+const currentSessionTitle = computed(() => getCurrentSession()?.title || 'AI Health Assistant')
 
 // Close WebSocket connection
 const closeWebSocket = () => {
@@ -273,11 +404,10 @@ onMounted(() => {
     userInfo.value = JSON.parse(userInfoStr)
   }
 
+  loadSessions()
+
   // Initialize WebSocket
   initWebSocket()
-
-  // Add welcome message
-  addMessage('ai', 'Hello! I am your AI Health Assistant. You can ask me health questions, or click the "Get Health Advice" button to receive personalized advice based on your health data.')
 })
 
 onUnmounted(() => {
@@ -289,8 +419,71 @@ onUnmounted(() => {
 .ai-chat-container {
   padding: 20px;
   height: calc(100vh - 120px);
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 16px;
+}
+
+.session-panel {
+  background: white;
+  border: 1px solid #ebeef5;
+  border-radius: 8px;
   display: flex;
   flex-direction: column;
+  min-height: 0;
+}
+
+.session-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid #ebeef5;
+}
+
+.session-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.session-list {
+  flex: 1;
+  padding: 8px 0;
+}
+
+.session-item {
+  padding: 10px 16px;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.session-item:hover {
+  background: #f5f7fa;
+}
+
+.session-item.active {
+  background: #ecf5ff;
+  border-color: #409eff;
+}
+
+.session-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.session-name {
+  font-weight: 600;
+  color: #303133;
+}
+
+.session-time {
+  font-size: 12px;
+  color: #909399;
 }
 
 .chat-card {
