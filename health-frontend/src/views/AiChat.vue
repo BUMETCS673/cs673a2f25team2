@@ -187,7 +187,7 @@ const initWebSocket = () => {
 let currentAiMessage = ''
 const handleMessage = (data) => {
   if (data.startsWith('data:')) {
-    const content = data.substring(5)
+    const content = data.substring(5).replace(/[\r\n]+$/g, '')
     const normalized = content.trim()
 
     if (normalized === '[DONE]') {
