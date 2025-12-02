@@ -114,6 +114,26 @@ const validateCardForm = () => {
   return true
 }
 
+const openExternalCheckout = () => {
+  if (paymentMethod.value === 'apple_pay') {
+    const applePayUrl = `https://pay.apple.com/checkout?amount=${currentPlan.value.price}&currency=USD`
+    window.open(applePayUrl, '_blank', 'noopener')
+    ElMessage.info('Opening Apple Pay for secure checkout...')
+  }
+
+  if (paymentMethod.value === 'paypal') {
+    const paypalParams = new URLSearchParams({
+      flow: 'checkout',
+      amount: currentPlan.value.price,
+      currency_code: 'USD',
+      intent: 'sale'
+    })
+    const paypalUrl = `https://www.paypal.com/checkoutnow?${paypalParams.toString()}`
+    window.open(paypalUrl, '_blank', 'noopener')
+    ElMessage.info('Redirecting to PayPal to complete your payment...')
+  }
+}
+
 const handlePay = async () => {
   if (!validateCardForm()) return
 
@@ -125,6 +145,8 @@ const handlePay = async () => {
       router.push('/login')
       return
     }
+
+    openExternalCheckout()
 
     await userApi.completePurchase({
       planType: selectedPlan.value,
