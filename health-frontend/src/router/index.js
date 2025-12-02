@@ -59,6 +59,12 @@ const routes = [
         meta: { title: 'AI Chat', icon: 'ChatDotRound' }
       },
       {
+        path: 'purchase',
+        name: 'Purchase',
+        component: () => import('../views/Purchase.vue'),
+        meta: { title: 'Purchase', icon: 'CreditCard' }
+      },
+      {
         path: 'user-management',
         name: 'UserManagement',
         component: () => import('../views/UserManagement.vue'),

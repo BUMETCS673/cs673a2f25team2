@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +51,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     private User loginUser = null;
     @Autowired
     private IBodyService bodyMapper;
+
+    private static final String PAYMENT_STATUS_UNPAID = "UNPAID";
+    private static final String PAYMENT_STATUS_ACTIVE = "ACTIVE";
+    private static final String PAYMENT_STATUS_EXPIRED = "EXPIRED";
     
     /**
      * Decrypt user sensitive information (email, phone)
@@ -78,6 +83,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             if (user.getPhone() != null && !user.getPhone().isEmpty()) {
                 user.setPhone(DataEncryptionUtil.encrypt(user.getPhone()));
             }
+            if (user.getPaymentStatus() == null || user.getPaymentStatus().isEmpty()) {
+                user.setPaymentStatus(PAYMENT_STATUS_UNPAID);
+            }
         }
     }
 
@@ -94,11 +102,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             // Set user password to null to avoid password leakage
             loginUser.setPassword(null);
 
+            refreshPaymentStatus(loginUser);
+
             String token = jwtConfig.createToken(loginUser); // Create Token
             Map<String, Object> data = new HashMap<>();
             data.put("token", token);
             data.put("username", loginUser.getUsername()); // Add username
             data.put("id", loginUser.getId()); // Add user ID
+            data.put("paymentStatus", loginUser.getPaymentStatus());
+            data.put("accessExpiry", loginUser.getAccessExpiry());
             return data;
         }
         return null;
@@ -137,6 +149,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         }
 
         if (loginUser != null) {
+            refreshPaymentStatus(loginUser);
+
             // Decrypt sensitive fields before returning to clients
             decryptUserSensitiveData(loginUser);
 
@@ -149,6 +163,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             data.put("email", loginUser.getEmail());
             data.put("phone", loginUser.getPhone());
             data.put("status", loginUser.getStatus());
+            data.put("paymentStatus", loginUser.getPaymentStatus());
+            data.put("accessExpiry", loginUser.getAccessExpiry());
             // Get user role list
             List<String> roleList = this.baseMapper.getRoleNameByUserId(loginUser.getId());
             data.put("roles", roleList);
@@ -270,6 +286,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             user.setPassword(PasswordUtil.encode(user.getPassword()));
             // Encrypt personal information (email, phone)
             encryptUserSensitiveData(user);
+            user.setPaymentStatus(PAYMENT_STATUS_UNPAID);
+            user.setAccessExpiry(null);
             user.setAvatar("https://bpic.51yuansu.com/pic2/cover/00/35/43/58119f542530c_610.jpg");
             this.baseMapper.insert(user);
             // Get ID after inserting data
@@ -350,6 +368,71 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             return true;
         }
         return false;
+    }
+
+    private void refreshPaymentStatus(User user) {
+        if (user == null) {
+            return;
+        }
+
+        LocalDateTime expiry = user.getAccessExpiry();
+        if (expiry != null && expiry.isBefore(LocalDateTime.now())) {
+            user.setPaymentStatus(PAYMENT_STATUS_EXPIRED);
+            User toUpdate = new User();
+            toUpdate.setId(user.getId());
+            toUpdate.setPaymentStatus(PAYMENT_STATUS_EXPIRED);
+            this.baseMapper.updateById(toUpdate);
+        }
+        if (user.getPaymentStatus() == null || user.getPaymentStatus().isEmpty()) {
+            user.setPaymentStatus(PAYMENT_STATUS_UNPAID);
+            User toUpdate = new User();
+            toUpdate.setId(user.getId());
+            toUpdate.setPaymentStatus(PAYMENT_STATUS_UNPAID);
+            this.baseMapper.updateById(toUpdate);
+        }
+    }
+
+    @Override
+    public Map<String, Object> completePurchase(String token, String planType, String paymentMethod) {
+        User purchaser;
+        try {
+            purchaser = jwtConfig.parseToken(token, User.class);
+        } catch (Exception e) {
+            return null;
+        }
+
+        if (purchaser == null) {
+            return null;
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime expiry = calculateExpiry(now, planType);
+
+        purchaser.setPaymentStatus(PAYMENT_STATUS_ACTIVE);
+        purchaser.setAccessExpiry(expiry);
+        User toUpdate = new User();
+        toUpdate.setId(purchaser.getId());
+        toUpdate.setPaymentStatus(PAYMENT_STATUS_ACTIVE);
+        toUpdate.setAccessExpiry(expiry);
+        this.baseMapper.updateById(toUpdate);
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("paymentStatus", purchaser.getPaymentStatus());
+        data.put("accessExpiry", purchaser.getAccessExpiry());
+        data.put("planType", planType);
+        data.put("paymentMethod", paymentMethod);
+        return data;
+    }
+
+    private LocalDateTime calculateExpiry(LocalDateTime now, String planType) {
+        if ("weekly".equalsIgnoreCase(planType)) {
+            return now.plusWeeks(1);
+        }
+        if ("monthly".equalsIgnoreCase(planType)) {
+            return now.plusMonths(1);
+        }
+        // Default single session: 24 hours of validity
+        return now.plusDays(1);
     }
 
 

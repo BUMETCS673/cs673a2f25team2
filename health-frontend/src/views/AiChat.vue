@@ -40,6 +40,12 @@
         <div class="chat-header">
           <el-icon><ChatDotRound /></el-icon>
           <span>{{ currentSessionTitle }}</span>
+          <el-tag :type="hasAccess ? 'success' : 'danger'" size="small" class="access-tag">
+            {{ accessBadgeText }}
+          </el-tag>
+          <el-button v-if="!hasAccess" size="small" type="primary" @click="openPlanDialog">
+            Purchase access
+          </el-button>
         </div>
       </template>
 
@@ -85,7 +91,7 @@
           <el-button
               type="primary"
               @click="sendHealthAdviceRequest"
-              :disabled="loading || !isConnected"
+              :disabled="loading || !isConnected || !hasAccess"
               class="health-advice-btn"
           >
             Get Health Advice
@@ -94,7 +100,7 @@
               v-model="inputMessage"
               placeholder="Enter your health question..."
               @keyup.enter="sendMessage"
-              :disabled="loading || !isConnected"
+              :disabled="loading || !isConnected || !hasAccess"
               class="message-input"
           />
           <div class="input-actions">
@@ -109,14 +115,14 @@
                 :icon="Plus"
                 circle
                 @click="triggerFileSelect"
-                :disabled="loading || !isConnected"
+                :disabled="loading || !isConnected || !hasAccess"
             />
             <el-button
                 type="primary"
                 :icon="Promotion"
                 circle
                 @click="sendMessage"
-                :disabled="!inputMessage.trim() || loading || !isConnected"
+                :disabled="!inputMessage.trim() || loading || !isConnected || !hasAccess"
             />
           </div>
         </div>
@@ -134,11 +140,46 @@
         </div>
       </div>
     </el-card>
+
+    <el-dialog
+        v-model="paywallVisible"
+        title="AI Chatbox is a premium feature"
+        width="420px"
+        align-center
+    >
+      <p class="paywall-text">
+        You need an active subscription to chat with the AI assistant. Choose a plan to unlock access.
+      </p>
+      <div class="dialog-actions">
+        <el-button type="primary" @click="openPlanDialog">Go to purchase</el-button>
+      </div>
+    </el-dialog>
+
+    <el-dialog
+        v-model="planDialogVisible"
+        title="Choose your AI Chatbox plan"
+        width="560px"
+        align-center
+    >
+      <div class="plan-grid">
+        <div v-for="plan in plans" :key="plan.key" class="plan-card">
+          <div class="plan-card-header">
+            <div class="plan-name">{{ plan.title }}</div>
+            <div class="plan-price">${{ plan.price }}</div>
+          </div>
+          <div class="plan-duration">{{ plan.duration }}</div>
+          <el-button type="primary" class="plan-button" @click="goToPurchase(plan.key)">
+            Purchase
+          </el-button>
+        </div>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
 import { computed, onMounted, onUnmounted, nextTick, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import {
   ChatDotRound,
@@ -150,6 +191,7 @@ import {
   Plus
 } from '@element-plus/icons-vue'
 import wsConfig from '../config/websocket'
+import userApi from '../api/user'
 
 // WebSocket connection
 let ws = null
@@ -164,6 +206,30 @@ const fileInputRef = ref(null)
 
 // Current user info
 const userInfo = ref(null)
+const paywallVisible = ref(false)
+const planDialogVisible = ref(false)
+const router = useRouter()
+
+const plans = [
+  { key: 'single', title: 'One-time access', price: 1.99, duration: 'Single chat session' },
+  { key: 'weekly', title: 'Weekly access', price: 5.99, duration: '7 days unlimited chats' },
+  { key: 'monthly', title: 'Monthly access', price: 9.99, duration: '30 days unlimited chats' }
+]
+
+const hasAccess = computed(() => {
+  if (!userInfo.value) return false
+  const status = (userInfo.value.paymentStatus || '').toUpperCase()
+  const expiry = userInfo.value.accessExpiry ? new Date(userInfo.value.accessExpiry) : null
+  return status === 'ACTIVE' && expiry && expiry.getTime() > Date.now()
+})
+
+const accessBadgeText = computed(() => {
+  if (hasAccess.value && userInfo.value?.accessExpiry) {
+    const expiry = new Date(userInfo.value.accessExpiry)
+    return `Active until ${expiry.toLocaleString()}`
+  }
+  return 'No subscription'
+})
 
 // Initialize WebSocket connection
 const initWebSocket = () => {
@@ -218,6 +284,47 @@ const handleMessage = (data) => {
       currentAiMessage += content
     }
   }
+}
+
+const refreshUserProfile = async () => {
+  const token = localStorage.getItem('token')
+  if (!token) {
+    paywallVisible.value = true
+    return
+  }
+
+  try {
+    const freshUserInfo = await userApi.getUserInfo(token)
+    const stored = localStorage.getItem('userInfo')
+    const merged = { ...(stored ? JSON.parse(stored) : {}), ...freshUserInfo }
+    userInfo.value = merged
+    localStorage.setItem('userInfo', JSON.stringify(merged))
+    if (!hasAccess.value) {
+      paywallVisible.value = true
+    }
+  } catch (error) {
+    console.error('Failed to refresh user info', error)
+    paywallVisible.value = true
+  }
+}
+
+const requireAccess = () => {
+  if (!hasAccess.value) {
+    ElMessage.warning('Please purchase access to use the AI Chatbox')
+    paywallVisible.value = true
+    return false
+  }
+  return true
+}
+
+const openPlanDialog = () => {
+  planDialogVisible.value = true
+}
+
+const goToPurchase = (planKey) => {
+  planDialogVisible.value = false
+  paywallVisible.value = false
+  router.push({ path: '/purchase', query: { plan: planKey } })
 }
 
 const saveSessions = () => {
@@ -301,6 +408,10 @@ const sendMessage = () => {
     return
   }
 
+  if (!requireAccess()) {
+    return
+  }
+
   const message = inputMessage.value.trim()
 
   // Add user message to interface
@@ -328,6 +439,10 @@ const sendHealthAdviceRequest = () => {
     return
   }
 
+  if (!requireAccess()) {
+    return
+  }
+
   // Add user request to interface
   addMessage('user', 'Get Health Advice')
   updateSessionTitle('Health Advice')
@@ -348,6 +463,10 @@ const sendHealthAdviceRequest = () => {
 const triggerFileSelect = () => {
   if (!isConnected.value) {
     ElMessage.warning('Please connect before uploading context files')
+    return
+  }
+
+  if (!requireAccess()) {
     return
   }
 
@@ -391,6 +510,10 @@ const handleFileChange = (event) => {
 const sendContextFile = (file, content) => {
   if (!isConnected.value || loading.value) {
     ElMessage.warning('Please wait for the current response to finish before uploading')
+    return
+  }
+
+  if (!requireAccess()) {
     return
   }
 
@@ -490,6 +613,8 @@ onMounted(() => {
     userInfo.value = JSON.parse(userInfoStr)
   }
 
+  refreshUserProfile()
+
   loadSessions()
 
   // Initialize WebSocket
@@ -532,6 +657,10 @@ onUnmounted(() => {
   align-items: center;
   gap: 8px;
   font-weight: 600;
+}
+
+.access-tag {
+  margin-left: 10px;
 }
 
 .session-list {
@@ -728,6 +857,42 @@ onUnmounted(() => {
   top: 10px;
   right: 10px;
   z-index: 10;
+}
+
+.paywall-text {
+  color: #606266;
+  line-height: 1.6;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+.plan-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.plan-card {
+  border: 1px solid #ebeef5;
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.plan-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.plan-button {
+  width: 100%;
 }
 
 /* Typing indicator */

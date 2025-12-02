@@ -2,7 +2,10 @@ package com.shanzhu.health.websocket;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.shanzhu.health.entity.BodyNotes;
+import com.shanzhu.health.entity.User;
+import com.shanzhu.health.mapper.UserMapper;
 import com.shanzhu.health.service.IBodyNotesService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.TextMessage;
@@ -12,6 +15,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,12 +25,14 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ChatWebSocketHandler extends TextWebSocketHandler {
     private final wsOpenAiChatModel openAiChatModel;
     private final IBodyNotesService bodyNotesService;
+    private final UserMapper userMapper;
     private final Map<String, StringBuilder> sessionContext = new ConcurrentHashMap<>();
 
     // Constructor injection of HistoryService and wsOpenAiChatModel
-    public ChatWebSocketHandler(wsOpenAiChatModel openAiChatModel, IBodyNotesService bodyNotesService) {
+    public ChatWebSocketHandler(wsOpenAiChatModel openAiChatModel, IBodyNotesService bodyNotesService, UserMapper userMapper) {
         this.openAiChatModel = openAiChatModel;
         this.bodyNotesService = bodyNotesService;
+        this.userMapper = userMapper;
     }
 
     @Override
@@ -36,6 +42,11 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         ChatRequest request = parseMessage(payload); // Define a method to parse JSON
         String question = request.getText();
         String sessionKey = getSessionKey(session, request);
+
+        if (!hasActiveAccess(request.getUsername())) {
+            streamSingleMessage(session, "Access denied. Please purchase a plan to use the AI Chatbox.");
+            return;
+        }
 
         if ("upload_context".equalsIgnoreCase(request.getType())) {
             handleUploadContext(session, sessionKey, request);
@@ -142,6 +153,26 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private boolean hasActiveAccess(String username) {
+        if (username == null || username.isEmpty()) {
+            return false;
+        }
+
+        LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(User::getUsername, username);
+        User user = userMapper.selectOne(wrapper);
+        if (user == null) {
+            return false;
+        }
+
+        LocalDateTime expiry = user.getAccessExpiry();
+        if (expiry == null || expiry.isBefore(LocalDateTime.now())) {
+            return false;
+        }
+
+        return "ACTIVE".equalsIgnoreCase(user.getPaymentStatus());
     }
 
     // Prompt construction method below
