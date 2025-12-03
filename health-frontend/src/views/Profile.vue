@@ -129,7 +129,7 @@ const passwordRules = {
 const formatPaymentStatus = (status) => {
   if (!status) return 'Unpaid'
   const upper = status.toUpperCase()
-  if (upper === 'ACTIVE') return 'Active'
+  if (upper === 'ACTIVE' || upper === 'PAID') return 'Active'
   if (upper === 'EXPIRED') return 'Expired'
   return 'Unpaid'
 }
@@ -137,7 +137,7 @@ const formatPaymentStatus = (status) => {
 const paymentStatusTagType = (status) => {
   if (!status) return 'danger'
   const upper = status.toUpperCase()
-  if (upper === 'ACTIVE') return 'success'
+  if (upper === 'ACTIVE' || upper === 'PAID') return 'success'
   if (upper === 'EXPIRED') return 'warning'
   return 'danger'
 }

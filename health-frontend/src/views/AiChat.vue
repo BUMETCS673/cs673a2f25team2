@@ -254,15 +254,23 @@ const plans = [
 
 const hasAccess = computed(() => {
   if (!userInfo.value) return false
+
   const status = (userInfo.value.paymentStatus || '').toUpperCase()
   const expiry = userInfo.value.accessExpiry ? new Date(userInfo.value.accessExpiry) : null
-  return status === 'ACTIVE' && expiry && expiry.getTime() > Date.now()
+  const statusAllows = status === 'ACTIVE' || status === 'PAID'
+
+  if (!statusAllows) return false
+  if (!expiry) return true
+  return expiry.getTime() > Date.now()
 })
 
 const accessBadgeText = computed(() => {
   if (hasAccess.value && userInfo.value?.accessExpiry) {
     const expiry = new Date(userInfo.value.accessExpiry)
     return `Active until ${expiry.toLocaleString()}`
+  }
+  if (hasAccess.value) {
+    return 'Access active'
   }
   return 'No subscription'
 })
