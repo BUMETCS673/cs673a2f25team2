@@ -143,32 +143,59 @@
 
     <el-dialog
         v-model="paywallVisible"
-        title="AI Chatbox is a premium feature"
-        width="420px"
+        width="480px"
         align-center
+        class="paywall-dialog"
     >
-      <p class="paywall-text">
-        You need an active subscription to chat with the AI assistant. Choose a plan to unlock access.
-      </p>
-      <div class="dialog-actions">
-        <el-button type="primary" @click="openPlanDialog">Go to purchase</el-button>
+      <template #header>
+        <div class="paywall-header">
+          <el-icon class="paywall-icon"><Lock /></el-icon>
+          <div class="paywall-title">AI Chatbox is a premium feature</div>
+        </div>
+      </template>
+      <div class="paywall-content">
+        <p class="paywall-text">
+          You need an active subscription to chat with the AI assistant.
+        </p>
+        <p class="paywall-subtitle">
+          Choose a plan to unlock access and start chatting with our AI Health Assistant.
+        </p>
       </div>
+      <template #footer>
+        <div class="paywall-footer">
+          <el-button type="primary" size="large" @click="openPlanDialog">
+            <el-icon style="margin-right: 6px;"><ShoppingCart /></el-icon>
+            Go to purchase
+          </el-button>
+        </div>
+      </template>
     </el-dialog>
 
     <el-dialog
         v-model="planDialogVisible"
-        title="Choose your AI Chatbox plan"
-        width="560px"
+        width="640px"
         align-center
+        class="plan-dialog"
     >
+      <template #header>
+        <div class="plan-header">
+          <el-icon class="plan-header-icon"><Trophy /></el-icon>
+          <div class="plan-header-title">Choose your AI Chatbox plan</div>
+          <div class="plan-header-subtitle">Select the best plan for your needs</div>
+        </div>
+      </template>
       <div class="plan-grid">
         <div v-for="plan in plans" :key="plan.key" class="plan-card">
           <div class="plan-card-header">
             <div class="plan-name">{{ plan.title }}</div>
-            <div class="plan-price">${{ plan.price }}</div>
+            <div class="plan-price">
+              <span class="price-symbol">$</span>
+              <span class="price-amount">{{ plan.price }}</span>
+            </div>
           </div>
           <div class="plan-duration">{{ plan.duration }}</div>
           <el-button type="primary" class="plan-button" @click="goToPurchase(plan.key)">
+            <el-icon style="margin-right: 6px;"><Select /></el-icon>
             Purchase
           </el-button>
         </div>
@@ -188,7 +215,11 @@ import {
   Promotion,
   CircleCheck,
   CircleClose,
-  Plus
+  Plus,
+  Lock,
+  ShoppingCart,
+  Trophy,
+  Select
 } from '@element-plus/icons-vue'
 import wsConfig from '../config/websocket'
 import userApi from '../api/user'
@@ -859,40 +890,202 @@ onUnmounted(() => {
   z-index: 10;
 }
 
-.paywall-text {
-  color: #606266;
-  line-height: 1.6;
+/* Paywall dialog styles */
+.paywall-dialog :deep(.el-dialog__header) {
+  padding: 30px 30px 20px;
+  text-align: center;
+  border-bottom: 1px solid #f0f0f0;
 }
 
-.dialog-actions {
+.paywall-dialog :deep(.el-dialog__body) {
+  padding: 30px;
+}
+
+.paywall-dialog :deep(.el-dialog__footer) {
+  padding: 20px 30px 30px;
+  text-align: center;
+  border-top: 1px solid #f0f0f0;
+}
+
+.paywall-header {
   display: flex;
-  justify-content: flex-end;
-  margin-top: 12px;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.paywall-icon {
+  font-size: 48px;
+  color: #409EFF;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.paywall-title {
+  font-size: 22px;
+  font-weight: 600;
+  color: #303133;
+  text-align: center;
+}
+
+.paywall-content {
+  text-align: center;
+  padding: 10px 0;
+}
+
+.paywall-text {
+  color: #606266;
+  font-size: 16px;
+  line-height: 1.8;
+  margin: 0 0 12px 0;
+  text-align: center;
+}
+
+.paywall-subtitle {
+  color: #909399;
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0;
+  text-align: center;
+}
+
+.paywall-footer {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.paywall-footer .el-button {
+  font-size: 16px;
+  padding: 12px 32px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.3);
+  transition: all 0.3s ease;
+}
+
+.paywall-footer .el-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(64, 158, 255, 0.4);
+}
+
+/* Plan dialog styles */
+.plan-dialog :deep(.el-dialog__header) {
+  padding: 30px 30px 20px;
+  text-align: center;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.plan-dialog :deep(.el-dialog__body) {
+  padding: 30px;
+}
+
+.plan-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.plan-header-icon {
+  font-size: 42px;
+  color: #F56C6C;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.plan-header-title {
+  font-size: 22px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.plan-header-subtitle {
+  font-size: 14px;
+  color: #909399;
 }
 
 .plan-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
 }
 
 .plan-card {
-  border: 1px solid #ebeef5;
-  border-radius: 10px;
-  padding: 12px;
+  border: 2px solid #ebeef5;
+  border-radius: 12px;
+  padding: 20px 16px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.plan-card:hover {
+  border-color: #409EFF;
+  box-shadow: 0 4px 16px rgba(64, 158, 255, 0.15);
+  transform: translateY(-4px);
 }
 
 .plan-card-header {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: center;
+  gap: 8px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.plan-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #303133;
+  text-align: center;
+}
+
+.plan-price {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+}
+
+.price-symbol {
+  font-size: 18px;
+  color: #409EFF;
+  font-weight: 600;
+}
+
+.price-amount {
+  font-size: 32px;
+  font-weight: 700;
+  color: #409EFF;
+  line-height: 1;
+}
+
+.plan-duration {
+  font-size: 13px;
+  color: #606266;
+  text-align: center;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8px;
 }
 
 .plan-button {
   width: 100%;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.plan-button:hover {
+  transform: scale(1.05);
 }
 
 /* Typing indicator */
