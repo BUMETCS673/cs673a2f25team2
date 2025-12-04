@@ -10,15 +10,20 @@
 <template>
   <div class="ai-chat-container">
     <div class="session-panel">
-      <div class="session-header">
-        <div class="session-title">
-          <el-icon><ChatDotRound /></el-icon>
-          <span>Chat History</span>
-        </div>
+    <div class="session-header">
+      <div class="session-title">
+        <el-icon><ChatDotRound /></el-icon>
+        <span>Chat History</span>
+      </div>
+      <div class="session-actions">
         <el-button type="primary" size="small" @click="createNewSession">
           New Chat
         </el-button>
+        <el-button type="primary" size="small" @click="clearAllSessions">
+          clean
+        </el-button>
       </div>
+    </div>
       <el-scrollbar class="session-list">
         <div
             v-for="session in sessions"
@@ -249,15 +254,23 @@ const plans = [
 
 const hasAccess = computed(() => {
   if (!userInfo.value) return false
+
   const status = (userInfo.value.paymentStatus || '').toUpperCase()
   const expiry = userInfo.value.accessExpiry ? new Date(userInfo.value.accessExpiry) : null
-  return status === 'ACTIVE' && expiry && expiry.getTime() > Date.now()
+  const statusAllows = status === 'ACTIVE' || status === 'PAID'
+
+  if (!statusAllows) return false
+  if (!expiry) return true
+  return expiry.getTime() > Date.now()
 })
 
 const accessBadgeText = computed(() => {
   if (hasAccess.value && userInfo.value?.accessExpiry) {
     const expiry = new Date(userInfo.value.accessExpiry)
     return `Active until ${expiry.toLocaleString()}`
+  }
+  if (hasAccess.value) {
+    return 'Access active'
   }
   return 'No subscription'
 })
@@ -358,8 +371,18 @@ const goToPurchase = (planKey) => {
   router.push({ path: '/purchase', query: { plan: planKey } })
 }
 
+const storageKey = computed(() => {
+  const identifier =
+    userInfo.value?.id ||
+    userInfo.value?.userId ||
+    userInfo.value?.username ||
+    userInfo.value?.email ||
+    'guest'
+  return `aiChatSessions_${identifier}`
+})
+
 const saveSessions = () => {
-  localStorage.setItem('aiChatSessions', JSON.stringify(sessions.value))
+  localStorage.setItem(storageKey.value, JSON.stringify(sessions.value))
 }
 
 const getCurrentSession = () => sessions.value.find((session) => session.id === activeSessionId.value)
@@ -400,7 +423,7 @@ const switchSession = (sessionId) => {
 }
 
 const loadSessions = () => {
-  const storedSessions = localStorage.getItem('aiChatSessions')
+  const storedSessions = localStorage.getItem(storageKey.value)
   if (storedSessions) {
     try {
       const parsed = JSON.parse(storedSessions) || []
@@ -422,6 +445,14 @@ const loadSessions = () => {
   } else {
     createNewSession()
   }
+}
+
+const clearAllSessions = () => {
+  sessions.value = []
+  messages.value = []
+  activeSessionId.value = ''
+  localStorage.removeItem(storageKey.value)
+  createNewSession()
 }
 
 const updateSessionTitle = (text) => {
@@ -637,14 +668,14 @@ const closeWebSocket = () => {
 }
 
 // Lifecycle hooks
-onMounted(() => {
+onMounted(async () => {
   // Get user info
   const userInfoStr = localStorage.getItem('userInfo')
   if (userInfoStr) {
     userInfo.value = JSON.parse(userInfoStr)
   }
 
-  refreshUserProfile()
+  await refreshUserProfile()
 
   loadSessions()
 
@@ -688,6 +719,11 @@ onUnmounted(() => {
   align-items: center;
   gap: 8px;
   font-weight: 600;
+}
+
+.session-actions {
+  display: flex;
+  gap: 8px;
 }
 
 .access-tag {

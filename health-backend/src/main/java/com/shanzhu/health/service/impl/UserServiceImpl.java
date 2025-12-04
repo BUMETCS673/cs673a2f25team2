@@ -375,6 +375,25 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             return;
         }
 
+        if (PAYMENT_STATUS_ACTIVE.equalsIgnoreCase(user.getPaymentStatus())) {
+            // Already normalized
+        } else if ("PAID".equalsIgnoreCase(user.getPaymentStatus())) {
+            // Normalize legacy PAID status to ACTIVE and ensure an expiry date exists
+            user.setPaymentStatus(PAYMENT_STATUS_ACTIVE);
+
+            User toUpdate = new User();
+            toUpdate.setId(user.getId());
+            toUpdate.setPaymentStatus(PAYMENT_STATUS_ACTIVE);
+
+            if (user.getAccessExpiry() == null) {
+                LocalDateTime defaultExpiry = LocalDateTime.now().plusMonths(1);
+                user.setAccessExpiry(defaultExpiry);
+                toUpdate.setAccessExpiry(defaultExpiry);
+            }
+
+            this.baseMapper.updateById(toUpdate);
+        }
+
         LocalDateTime expiry = user.getAccessExpiry();
         if (expiry != null && expiry.isBefore(LocalDateTime.now())) {
             user.setPaymentStatus(PAYMENT_STATUS_EXPIRED);

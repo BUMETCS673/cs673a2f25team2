@@ -55,7 +55,25 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 
         String username = request.getUsername();
         if (question.equals("AI Health Advice")) {
-            List<BodyNotes> bodyNotes = bodyNotesService.getBodyNotesByUsername(username);
+            if (username == null || username.isEmpty()) {
+                streamSingleMessage(session, "I'm so sorry that I still don't know you, Please enter your health information before getting any health advice");
+                return;
+            }
+
+            LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(User::getUsername, username);
+            User user = userMapper.selectOne(wrapper);
+
+            if (user == null) {
+                streamSingleMessage(session, "I'm so sorry that I still don't know you, Please enter your health information before getting any health advice");
+                return;
+            }
+
+            List<BodyNotes> bodyNotes = bodyNotesService.getBodyNotes(user.getId());
+            if (bodyNotes == null || bodyNotes.isEmpty()) {
+                streamSingleMessage(session, "I'm so sorry that I still don't know you, Please enter your health information before getting any health advice");
+                return;
+            }
             question = constructPrompt(bodyNotes);
         }
 
