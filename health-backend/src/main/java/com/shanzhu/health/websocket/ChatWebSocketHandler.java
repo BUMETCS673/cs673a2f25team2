@@ -56,6 +56,10 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         String username = request.getUsername();
         if (question.equals("AI Health Advice")) {
             List<BodyNotes> bodyNotes = bodyNotesService.getBodyNotesByUsername(username);
+            if (bodyNotes == null || bodyNotes.isEmpty()) {
+                streamSingleMessage(session, "请先输入个人基本健康信息后再点击 Get Health Advice。");
+                return;
+            }
             question = constructPrompt(bodyNotes);
         }
 
