@@ -28,39 +28,19 @@
       <el-col :span="16">
         <el-card>
           <template #header>
-            <span>Change Password</span>
+            <span>Account Settings</span>
           </template>
-          <el-form :model="passwordForm" :rules="passwordRules" ref="passwordFormRef" label-width="150px">
-            <el-form-item label="Current Password" prop="password">
-              <el-input
-                v-model="passwordForm.password"
-                type="password"
-                show-password
-                placeholder="Please enter current password"
-              />
-            </el-form-item>
-            <el-form-item label="New Password" prop="newPassword">
-              <el-input
-                v-model="passwordForm.newPassword"
-                type="password"
-                show-password
-                placeholder="Please enter new password"
-              />
-            </el-form-item>
-            <el-form-item label="Confirm New Password" prop="confirmPassword">
-              <el-input
-                v-model="passwordForm.confirmPassword"
-                type="password"
-                show-password
-                placeholder="Please enter new password again"
-              />
-            </el-form-item>
-            <el-form-item>
-              <el-button type="primary" @click="handleChangePassword" :loading="passwordLoading">
-                Change Password
-              </el-button>
-            </el-form-item>
-          </el-form>
+          <div class="button-group">
+            <el-button type="primary" size="large" @click="showPasswordDialog = true">
+              Change Password
+            </el-button>
+            <el-button type="success" size="large" @click="handleOpenEmailDialog">
+              Change Email
+            </el-button>
+            <el-button type="warning" size="large" @click="handleOpenPhoneDialog">
+              Change Phone Number
+            </el-button>
+          </div>
         </el-card>
 
         <el-card style="margin-top: 20px;">
@@ -88,6 +68,93 @@
         </el-card>
       </el-col>
     </el-row>
+
+    <!-- Change Password Dialog -->
+    <el-dialog
+      v-model="showPasswordDialog"
+      title="Change Password"
+      width="500px"
+      @close="handlePasswordDialogClose"
+    >
+      <el-form :model="passwordForm" :rules="passwordRules" ref="passwordFormRef" label-width="180px">
+        <el-form-item label="Current Password" prop="password">
+          <el-input
+            v-model="passwordForm.password"
+            type="password"
+            show-password
+            placeholder="Please enter current password"
+          />
+        </el-form-item>
+        <el-form-item label="New Password" prop="newPassword">
+          <el-input
+            v-model="passwordForm.newPassword"
+            type="password"
+            show-password
+            placeholder="Please enter new password"
+          />
+        </el-form-item>
+        <el-form-item label="Confirm New Password" prop="confirmPassword">
+          <el-input
+            v-model="passwordForm.confirmPassword"
+            type="password"
+            show-password
+            placeholder="Please enter new password again"
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="handlePasswordDialogClose">Cancel</el-button>
+        <el-button type="primary" @click="handleChangePassword" :loading="passwordLoading">
+          Confirm
+        </el-button>
+      </template>
+    </el-dialog>
+
+    <!-- Change Email Dialog -->
+    <el-dialog
+      v-model="showEmailDialog"
+      title="Change Email"
+      width="500px"
+      @close="handleEmailDialogClose"
+    >
+      <el-form :model="emailForm" :rules="emailRules" ref="emailFormRef" label-width="150px">
+        <el-form-item label="New Email" prop="email">
+          <el-input
+            v-model="emailForm.email"
+            placeholder="Please enter new email"
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="handleEmailDialogClose">Cancel</el-button>
+        <el-button type="primary" @click="handleChangeEmail" :loading="emailLoading">
+          Confirm
+        </el-button>
+      </template>
+    </el-dialog>
+
+    <!-- Change Phone Dialog -->
+    <el-dialog
+      v-model="showPhoneDialog"
+      title="Change Phone Number"
+      width="500px"
+      @close="handlePhoneDialogClose"
+    >
+      <el-form :model="phoneForm" :rules="phoneRules" ref="phoneFormRef" label-width="170px">
+        <el-form-item label="New Phone Number" prop="phone">
+          <el-input
+            v-model="phoneForm.phone"
+            placeholder="Please enter new phone number"
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="handlePhoneDialogClose">Cancel</el-button>
+        <el-button type="primary" @click="handleChangePhone" :loading="phoneLoading">
+          Confirm
+        </el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -98,12 +165,27 @@ import userApi from '../api/user'
 
 const userInfo = ref(null)
 const passwordFormRef = ref(null)
+const emailFormRef = ref(null)
+const phoneFormRef = ref(null)
 const passwordLoading = ref(false)
+const emailLoading = ref(false)
+const phoneLoading = ref(false)
+const showPasswordDialog = ref(false)
+const showEmailDialog = ref(false)
+const showPhoneDialog = ref(false)
 
 const passwordForm = reactive({
   password: '',
   newPassword: '',
   confirmPassword: ''
+})
+
+const emailForm = reactive({
+  email: ''
+})
+
+const phoneForm = reactive({
+  phone: ''
 })
 
 const validateConfirmPassword = (rule, value, callback) => {
@@ -124,6 +206,40 @@ const passwordRules = {
     { required: true, message: 'Please confirm new password', trigger: 'blur' },
     { validator: validateConfirmPassword, trigger: 'blur' }
   ]
+}
+
+const validateEmail = (rule, value, callback) => {
+  if (!value) {
+    callback(new Error('Please enter email'))
+  } else {
+    const emailReg = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailReg.test(value)) {
+      callback(new Error('Please enter a valid email format'))
+    } else {
+      callback()
+    }
+  }
+}
+
+const validatePhone = (rule, value, callback) => {
+  if (!value) {
+    callback(new Error('Please enter phone number'))
+  } else {
+    const phoneReg = /^1[3-9]\d{9}$/
+    if (!phoneReg.test(value)) {
+      callback(new Error('Please enter a valid phone number (11 digits, starting with 1)'))
+    } else {
+      callback()
+    }
+  }
+}
+
+const emailRules = {
+  email: [{ validator: validateEmail, trigger: 'blur' }]
+}
+
+const phoneRules = {
+  phone: [{ validator: validatePhone, trigger: 'blur' }]
 }
 
 const formatPaymentStatus = (status) => {
@@ -156,8 +272,29 @@ const loadUserInfo = async () => {
   if (token) {
     try {
       const data = await userApi.getUserInfo(token)
-      userInfo.value = data
-      localStorage.setItem('userInfo', JSON.stringify(data))
+      if (data) {
+        userInfo.value = {
+          ...data,
+          username: data.name || data.username || ''
+        }
+        // 如果有用户ID，尝试获取完整信息（包括email、phone、status）
+        if (data.id) {
+          try {
+            const fullData = await userApi.getUserById(data.id)
+            if (fullData) {
+              userInfo.value = {
+                ...userInfo.value,
+                ...fullData,
+                username: data.name || data.username || fullData.username || ''
+              }
+            }
+          } catch (error) {
+            // 如果获取失败，使用已有数据
+            console.warn('Failed to get full user data:', error)
+          }
+        }
+        localStorage.setItem('userInfo', JSON.stringify(userInfo.value))
+      }
     } catch (error) {
       ElMessage.error('Failed to get user information')
     }
@@ -176,11 +313,143 @@ const handleChangePassword = async () => {
           newPassword: passwordForm.newPassword
         })
         ElMessage.success('Password changed successfully')
-        passwordFormRef.value.resetFields()
+        handlePasswordDialogClose()
       } catch (error) {
         ElMessage.error(error.message || 'Failed to change password')
       } finally {
         passwordLoading.value = false
+      }
+    }
+  })
+}
+
+const handlePasswordDialogClose = () => {
+  showPasswordDialog.value = false
+  if (passwordFormRef.value) {
+    passwordFormRef.value.resetFields()
+  }
+  passwordForm.password = ''
+  passwordForm.newPassword = ''
+  passwordForm.confirmPassword = ''
+}
+
+const handleOpenEmailDialog = () => {
+  emailForm.email = userInfo.value?.email || ''
+  showEmailDialog.value = true
+}
+
+const handleEmailDialogClose = () => {
+  showEmailDialog.value = false
+  if (emailFormRef.value) {
+    emailFormRef.value.resetFields()
+  }
+  emailForm.email = ''
+}
+
+const handleOpenPhoneDialog = () => {
+  phoneForm.phone = userInfo.value?.phone || ''
+  showPhoneDialog.value = true
+}
+
+const handlePhoneDialogClose = () => {
+  showPhoneDialog.value = false
+  if (phoneFormRef.value) {
+    phoneFormRef.value.resetFields()
+  }
+  phoneForm.phone = ''
+}
+
+const handleChangeEmail = async () => {
+  if (!emailFormRef.value) return
+  await emailFormRef.value.validate(async (valid) => {
+    if (valid) {
+      emailLoading.value = true
+      try {
+        const userId = userInfo.value?.id
+        if (!userId) {
+          ElMessage.error('User ID not found')
+          emailLoading.value = false
+          return
+        }
+        
+        // 获取用户的完整信息（包括角色），以保持角色不变
+        let userData = null
+        try {
+          userData = await userApi.getUserById(userId)
+        } catch (error) {
+          console.warn('Failed to get user details')
+        }
+        
+        const updateData = {
+          id: userId,
+          username: userInfo.value.username || userData?.username,
+          email: emailForm.email,
+          phone: userInfo.value.phone || userData?.phone || null,
+          status: userInfo.value.status !== undefined ? userInfo.value.status : (userData?.status !== undefined ? userData.status : 1),
+          avatar: userInfo.value.avatar || userData?.avatar || null
+        }
+        
+        if (userData && userData.roleIdList) {
+          updateData.roleIdList = userData.roleIdList
+        }
+        
+        await userApi.updateUser(updateData)
+        ElMessage.success('Email updated successfully')
+        handleEmailDialogClose()
+        await loadUserInfo()
+        localStorage.setItem('bodyInfoUpdated', 'true')
+      } catch (error) {
+        ElMessage.error(error.message || 'Failed to update email')
+      } finally {
+        emailLoading.value = false
+      }
+    }
+  })
+}
+
+const handleChangePhone = async () => {
+  if (!phoneFormRef.value) return
+  await phoneFormRef.value.validate(async (valid) => {
+    if (valid) {
+      phoneLoading.value = true
+      try {
+        const userId = userInfo.value?.id
+        if (!userId) {
+          ElMessage.error('User ID not found')
+          phoneLoading.value = false
+          return
+        }
+        
+        // 获取用户的完整信息（包括角色），以保持角色不变
+        let userData = null
+        try {
+          userData = await userApi.getUserById(userId)
+        } catch (error) {
+          console.warn('Failed to get user details')
+        }
+        
+        const updateData = {
+          id: userId,
+          username: userInfo.value.username || userData?.username,
+          email: userInfo.value.email || userData?.email || null,
+          phone: phoneForm.phone,
+          status: userInfo.value.status !== undefined ? userInfo.value.status : (userData?.status !== undefined ? userData.status : 1),
+          avatar: userInfo.value.avatar || userData?.avatar || null
+        }
+        
+        if (userData && userData.roleIdList) {
+          updateData.roleIdList = userData.roleIdList
+        }
+        
+        await userApi.updateUser(updateData)
+        ElMessage.success('Phone number updated successfully')
+        handlePhoneDialogClose()
+        await loadUserInfo()
+        localStorage.setItem('bodyInfoUpdated', 'true')
+      } catch (error) {
+        ElMessage.error(error.message || 'Failed to update phone number')
+      } finally {
+        phoneLoading.value = false
       }
     }
   })
@@ -275,6 +544,50 @@ onMounted(() => {
   padding: 0 12px;
   height: 26px;
   line-height: 26px;
+}
+
+:deep(.el-dialog) {
+  border-radius: 12px;
+}
+
+:deep(.el-dialog__header) {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  padding: 20px 25px;
+  margin: 0;
+  border-radius: 12px 12px 0 0;
+}
+
+:deep(.el-dialog__title) {
+  color: #fff;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+:deep(.el-dialog__headerbtn .el-dialog__close) {
+  color: #fff;
+  font-size: 20px;
+}
+
+:deep(.el-dialog__body) {
+  padding: 30px;
+}
+
+:deep(.el-dialog__footer) {
+  padding: 20px 30px;
+  border-top: 1px solid #e4e7ed;
+}
+
+.button-group {
+  padding: 20px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.button-group :deep(.el-button) {
+  width: 100%;
+  margin: 0;
 }
 </style>
 
