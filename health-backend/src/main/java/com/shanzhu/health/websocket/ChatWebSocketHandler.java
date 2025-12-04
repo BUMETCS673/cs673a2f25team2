@@ -56,7 +56,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         String username = request.getUsername();
         if (question.equals("AI Health Advice")) {
             if (username == null || username.isEmpty()) {
-                streamSingleMessage(session, "请先输入个人基本健康信息后再点击 Get Health Advice。");
+                streamSingleMessage(session, "I'm so sorry that I still don't know you, Please enter your health information before getting any health advice");
                 return;
             }
 
@@ -65,13 +65,13 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             User user = userMapper.selectOne(wrapper);
 
             if (user == null) {
-                streamSingleMessage(session, "请先输入个人基本健康信息后再点击 Get Health Advice。");
+                streamSingleMessage(session, "I'm so sorry that I still don't know you, Please enter your health information before getting any health advice");
                 return;
             }
 
             List<BodyNotes> bodyNotes = bodyNotesService.getBodyNotes(user.getId());
             if (bodyNotes == null || bodyNotes.isEmpty()) {
-                streamSingleMessage(session, "请先输入个人基本健康信息后再点击 Get Health Advice。");
+                streamSingleMessage(session, "I'm so sorry that I still don't know you, Please enter your health information before getting any health advice");
                 return;
             }
             question = constructPrompt(bodyNotes);

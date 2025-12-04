@@ -4,7 +4,7 @@ spring:
       # Here we use Alibaba's Qwen model, if you need to modify to other models, please adjust the configuration yourself
       base-url: https://dashscope-intl.aliyuncs.com/compatible-mode
       # Fill in the key applied from Alibaba Bailian large model platform (https://bailian.console.aliyun.com/?tab=model#/model-market)
-      api-key:
+      api-key: XXX
       # This configuration is for "chat model"
       chat:
         options:
