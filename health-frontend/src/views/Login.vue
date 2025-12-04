@@ -342,23 +342,25 @@ const handleAdminLogin = async () => {
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
   color: #909399;
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 1px;
   position: relative;
+  gap: 12px;
 }
 
 .login-divider::before,
 .login-divider::after {
   content: '';
   flex: 1;
-  height: 1px;
-  background-color: #ebeef5;
+  border-top: 1px solid #dcdfe6;
 }
 
 .login-divider span {
-  margin: 0 12px;
+  display: inline-block;
+  text-align: center;
 }
 
 .google-login-button {
