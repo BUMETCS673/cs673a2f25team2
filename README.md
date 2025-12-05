@@ -25,7 +25,8 @@ The Personal Health Management System is a full-stack web application designed t
 - **ORM**: MyBatis 3.x
 - **Security**: BCrypt password encryption, OAuth 2.0
 - **Build Tool**: Maven
-- **Java Version**: 8+
+- **Java Version**: 17+
+- **SpringAI**
 
 **Frontend:**
 - **Framework**: Vue.js 2.6.10
@@ -136,6 +137,10 @@ The system uses a comprehensive database schema with the following main entities
    ```
    
    The backend server will start on `http://localhost:8000`
+
+4. **About the AI Chatbox page**
+   - Go to the application.yml set up the API key
+   - Or simply go check our demo video in Google drive to see how it works
 
 ### Frontend Setup
 
